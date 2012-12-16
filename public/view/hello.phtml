@@ -1,0 +1,37 @@
+<?php
+if (isset($name)) {
+    if (!is_string($name)) {
+        foreach ($name as $key => $value) {
+            $name[$key] = ucfirst($value);
+        }
+        $name = implode(' ', (array)$name);
+
+    }
+} else {
+    $name = null;
+}
+?>
+<!DOCTYPE html>
+<!-- Header //-->
+<html>
+
+<head>
+
+    <title>
+        Hello, <?php echo $name . PHP_EOL; ?>
+    </title>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+</head>
+
+<body>
+<!-- Content //-->
+<div id="content">
+    <h1>Hello, <?php echo $name; ?></h1>
+    <p>You have said that your name is <strong>&quot;<?php echo $name; ?>&quot;</strong></p>
+</div>
+<!-- Footer //-->
+</body>
+
+</html>

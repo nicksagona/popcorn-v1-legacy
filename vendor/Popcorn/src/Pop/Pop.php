@@ -71,11 +71,13 @@ class Pop
      * @var array
      */
     protected $routes = array(
-        'get'    => array(),
-        'post'   => array(),
-        'put'    => array(),
-        'delete' => array(),
-        'error'  => null
+        'get'     => array(),
+        'post'    => array(),
+        'put'     => array(),
+        'delete'  => array(),
+        'options' => array(),
+        'head'    => array(),
+        'error'   => null
     );
 
     /**
@@ -215,6 +217,40 @@ class Pop
     }
 
     /**
+     * Add a URL to the 'options' route
+     *
+     * @param  string $uri
+     * @param  mixed $action
+     * @return void
+     */
+    public function options($uri, $action)
+    {
+        $params = $this->getUriParams($uri);
+        $uri = $this->getUriAction($uri);
+        $this->routes['options'][$uri] = array(
+            'action' => $action,
+            'params' => $params
+        );
+    }
+
+    /**
+     * Add a URL to the 'head' route
+     *
+     * @param  string $uri
+     * @param  mixed $action
+     * @return void
+     */
+    public function head($uri, $action)
+    {
+        $params = $this->getUriParams($uri);
+        $uri = $this->getUriAction($uri);
+        $this->routes['head'][$uri] = array(
+            'action' => $action,
+            'params' => $params
+        );
+    }
+
+    /**
      * Add an action to the 'error' route
      *
      * @param  mixed $action
@@ -223,43 +259,6 @@ class Pop
     public function error($action)
     {
         $this->routes['error'] = $action;
-    }
-
-    /**
-     * Add any project specific code to this method for run-time use here.
-     *
-     * @throws Exception
-     * @return void
-     */
-    public function run()
-    {
-        $uri = $this->getUriAction($this->request->getRequestUri());
-        $route = $this->routes[strtolower($this->request->getMethod())];
-        $params = array();
-
-        if (isset($route[$uri])) {
-            $params = $this->getRequestParams($route[$uri]);
-        }
-
-        if ($this->isValidRequest($uri) && (count($params) == count($route[$uri]['params'])) && (array_search('', $params) === false)) {
-            $this->result = call_user_func_array($route[$uri]['action'], $params);
-        } else {
-            if (null !== $this->routes['error']) {
-                $this->result = call_user_func_array($this->routes['error'], array());
-            } else {
-                throw new Exception('Error: No error action has been defined.');
-            }
-        }
-    }
-
-    /**
-     * Method to get the result
-     *
-     * @return mixed
-     */
-    public function getResult()
-    {
-        return $this->result;
     }
 
     /**
@@ -318,6 +317,56 @@ class Pop
     }
 
     /**
+     * Method to get the result
+     *
+     * @return mixed
+     */
+    public function getResult()
+    {
+        return $this->result;
+    }
+
+    /**
+     * Add any project specific code to this method for run-time use here.
+     *
+     * @throws Exception
+     * @return void
+     */
+    public function run()
+    {
+        $uri = $this->getUriAction($this->request->getRequestUri());
+        $route = $this->routes[strtolower($this->request->getMethod())];
+        $params = array();
+
+        if (isset($route[$uri])) {
+            $params = $this->getRequestParams($route[$uri]);
+        }
+
+        if ($this->isValidRequest($uri) && (count($params) == count($route[$uri]['params']))) {
+            $params = $this->getRequestParams($route[$uri]);
+            $this->result = call_user_func_array($route[$uri]['action'], $params);
+        } else {
+            if (null !== $this->routes['error']) {
+                $this->result = call_user_func_array($this->routes['error'], array());
+            } else {
+                throw new Exception('Error: No error action has been defined to handle errors.');
+            }
+        }
+
+        if ((null !== $this->result) && ($this->result instanceof Mvc\Model)) {
+            if ($this->response->getCode() == 200) {
+                $viewFile = ($uri == '/') ? '/index.phtml' : $uri . '.phtml';
+            } else {
+                $viewFile = '/error.phtml';
+            }
+
+            $this->view = Mvc\View::factory($this->viewPath . $viewFile, $this->result);
+            $this->response->setBody($this->view->render(true));
+            $this->response->send();
+        }
+    }
+
+    /**
      * Method to get the URI action
      *
      * @param  string $uri
@@ -364,8 +413,10 @@ class Pop
         unset($params[0]);
 
         foreach ($route['params'] as $key => $value) {
-            if (isset($params[$key])) {
-                $requestParams[$value] = $params[$key];
+            if (substr($value, -1) == '*') {
+                $requestParams[$value] = (count($params) > 0) ? $params : array();
+            } else {
+                $requestParams[$value] = (isset($params[$key])) ? $params[$key] : null;
             }
         }
 
@@ -382,46 +433,24 @@ class Pop
     {
         $code = 404;
 
-        if ($this->request->getMethod() == 'GET') {
-            if (array_key_exists($uri, $this->routes['get'])) {
-                $code = 200;
-            } else {
-                if (array_key_exists($uri, $this->routes['post']) ||
-                    array_key_exists($uri, $this->routes['put']) ||
-                    array_key_exists($uri, $this->routes['delete'])) {
-                    $code = 405;
-                }
-            }
-        } else if ($this->request->getMethod() == 'POST') {
-            if (array_key_exists($uri, $this->routes['post'])) {
-                $code = 200;
-            } else {
-                if (array_key_exists($uri, $this->routes['get']) ||
-                    array_key_exists($uri, $this->routes['put']) ||
-                    array_key_exists($uri, $this->routes['delete'])) {
-                    $code = 405;
-                }
-            }
-        } else if ($this->request->getMethod() == 'PUT') {
-            if (array_key_exists($uri, $this->routes['put'])) {
-                $code = 200;
-            } else {
-                if (array_key_exists($uri, $this->routes['get']) ||
-                    array_key_exists($uri, $this->routes['post']) ||
-                    array_key_exists($uri, $this->routes['delete'])) {
-                    $code = 405;
-                }
-            }
-        } else if ($this->request->getMethod() == 'DELETE') {
-            if (array_key_exists($uri, $this->routes['delete'])) {
-                $code = 200;
-            } else {
-                if (array_key_exists($uri, $this->routes['get']) ||
-                    array_key_exists($uri, $this->routes['post']) ||
-                    array_key_exists($uri, $this->routes['put'])) {
-                    $code = 405;
-                }
-            }
+        if (($this->request->getMethod() == 'GET') &&
+            array_key_exists($uri, $this->routes['get'])) {
+            $code = 200;
+        } else if (($this->request->getMethod() == 'POST') &&
+            array_key_exists($uri, $this->routes['post'])) {
+            $code = 200;
+        } else if (($this->request->getMethod() == 'PUT') &&
+            array_key_exists($uri, $this->routes['put'])) {
+            $code = 200;
+        } else if (($this->request->getMethod() == 'DELETE') &&
+            array_key_exists($uri, $this->routes['delete'])) {
+            $code = 200;
+        } else if (($this->request->getMethod() == 'OPTIONS') &&
+            array_key_exists($uri, $this->routes['options'])) {
+            $code = 200;
+        } else if (($this->request->getMethod() == 'HEAD') &&
+            array_key_exists($uri, $this->routes['head'])) {
+            $code = 200;
         }
 
         $this->response->setCode($code);
