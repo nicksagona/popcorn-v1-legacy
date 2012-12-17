@@ -31,6 +31,7 @@ require_once '../vendor/Popcorn/src/Pop/Pop.php';
 </pre>
 
 ### A Simple Example
+<pre>
 $pop = new Pop\Pop();
 $pop->get('/hello/:name', function($name) {
     echo 'Hello, ' . ucfirst($name) . '!';
