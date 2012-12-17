@@ -94,7 +94,7 @@ $pop = new Pop\Pop();
 // The variable $name is populated with an array of values
 // from the URI, such as: /hello/john/t/doe
 $pop->get('/hello/:name*', function($name) {
-    // Dumps array('john', 't', 'doe');
+    // Dumps array('john', 't', 'doe')
     print_r($name);
 });
 
