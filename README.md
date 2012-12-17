@@ -22,6 +22,11 @@ FEATURES
 * Support for custom view/template management and rendering
 * Autoloading and support for registering other libraries of code.
 
+DOCUMENTATION
+-------------
+* [API Documentation](http://popcorn.popphp.org/docs/api/)
+* [Unit Test Code Coverage](http://popcorn.popphp.org/docs/cc/)
+
 GETTING STARTED
 ---------------
 You'll need this at the top of your main script:
