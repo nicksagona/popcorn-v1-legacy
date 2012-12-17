@@ -6,6 +6,8 @@ if (isset($name)) {
         }
         $name = implode(' ', (array)$name);
 
+    } else {
+        $name = ucfirst($name);
     }
 } else {
     $name = null;

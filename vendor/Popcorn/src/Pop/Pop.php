@@ -1,6 +1,6 @@
 <?php
 /**
- * Pop PHP Framework
+ * Popcorn Micro-Framework
  *
  * LICENSE
  *
@@ -25,14 +25,14 @@
 namespace Pop;
 
 /**
- * This is the Pop class.
+ * This is the main Pop class for the Popcorn Micro-Framework.
  *
  * @category   Pop
  * @package    Pop
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2012 Moc 10 Media, LLC. (http://www.moc10media.com)
  * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
- * @version    1.1.0
+ * @version    0.9
  */
 class Pop
 {
@@ -41,6 +41,18 @@ class Pop
      * Current version
      */
     const VERSION = '0.9';
+
+    /**
+     * Array of available namespaces prefixes.
+     * @var array
+     */
+    protected $prefixes = array();
+
+    /**
+     * Config object
+     * @var \Pop\Config
+     */
+    protected $config = null;
 
     /**
      * Request object
@@ -81,6 +93,12 @@ class Pop
     );
 
     /**
+     * Project events
+     * @var \Pop\Event\Manager
+     */
+    protected $events = null;
+
+    /**
      * Result
      * @var mixed
      */
@@ -91,13 +109,44 @@ class Pop
      *
      * Instantiate a Pop object
      *
+     * @param  array   $config
+     * @param  boolean $changes
      * @return \Pop\Pop
      */
-    public function __construct()
+    public function __construct(array $config = array(), $changes = false)
     {
         spl_autoload_register($this, true, true);
+        $this->register('Pop', __DIR__ . '/../');
         $this->request = new \Pop\Http\Request();
         $this->response = new \Pop\Http\Response();
+        $this->events = new \Pop\Event\Manager();
+        $this->config = new \Pop\Config($config, $changes);
+    }
+
+    /**
+     * Register a namespace and directory location with the autoloader
+     *
+     * @param  string $namespace
+     * @param  string $directory
+     * @return \Pop\Pop
+     */
+    public function register($namespace, $directory)
+    {
+        $this->prefixes[$namespace] = realpath($directory);
+        return $this;
+    }
+
+    /**
+     * Method to set the config object
+     *
+     * @param  array   $config
+     * @param  boolean $changes
+     * @return \Pop\Pop
+     */
+    public function setConfig(array $config = array(), $changes = false)
+    {
+        $this->config = new \Pop\Config($config, $changes);
+        return $this;
     }
 
     /**
@@ -153,7 +202,7 @@ class Pop
      *
      * @param  string $uri
      * @param  mixed $action
-     * @return void
+     * @return \Pop\Pop
      */
     public function get($uri, $action)
     {
@@ -163,6 +212,8 @@ class Pop
             'action' => $action,
             'params' => $params
         );
+
+        return $this;
     }
 
     /**
@@ -170,7 +221,7 @@ class Pop
      *
      * @param  string $uri
      * @param  mixed $action
-     * @return void
+     * @return \Pop\Pop
      */
     public function post($uri, $action)
     {
@@ -180,6 +231,8 @@ class Pop
             'action' => $action,
             'params' => $params
         );
+
+        return $this;
     }
 
     /**
@@ -187,7 +240,7 @@ class Pop
      *
      * @param  string $uri
      * @param  mixed $action
-     * @return void
+     * @return \Pop\Pop
      */
     public function put($uri, $action)
     {
@@ -197,6 +250,8 @@ class Pop
             'action' => $action,
             'params' => $params
         );
+
+        return $this;
     }
 
     /**
@@ -204,7 +259,7 @@ class Pop
      *
      * @param  string $uri
      * @param  mixed $action
-     * @return void
+     * @return \Pop\Pop
      */
     public function delete($uri, $action)
     {
@@ -214,6 +269,8 @@ class Pop
             'action' => $action,
             'params' => $params
         );
+
+        return $this;
     }
 
     /**
@@ -221,7 +278,7 @@ class Pop
      *
      * @param  string $uri
      * @param  mixed $action
-     * @return void
+     * @return \Pop\Pop
      */
     public function options($uri, $action)
     {
@@ -231,6 +288,8 @@ class Pop
             'action' => $action,
             'params' => $params
         );
+
+        return $this;
     }
 
     /**
@@ -238,7 +297,7 @@ class Pop
      *
      * @param  string $uri
      * @param  mixed $action
-     * @return void
+     * @return \Pop\Pop
      */
     public function head($uri, $action)
     {
@@ -248,17 +307,59 @@ class Pop
             'action' => $action,
             'params' => $params
         );
+
+        return $this;
     }
 
     /**
      * Add an action to the 'error' route
      *
      * @param  mixed $action
-     * @return void
+     * @return \Pop\Pop
      */
     public function error($action)
     {
         $this->routes['error'] = $action;
+        return $this;
+    }
+
+    /**
+     * Method to get the config object
+     *
+     * @return \Pop\Config
+     */
+    public function config()
+    {
+        return $this->config;
+    }
+
+    /**
+     * Attach an event. Default project event name hook-points are:
+     *
+     *   route.pre
+     *   route.post
+     *   dispatch.pre
+     *   dispatch.post
+     *
+     * @param  string $name
+     * @param  mixed  $action
+     * @param  int    $priority
+     * @return \Pop\Pop
+     */
+    public function attachEvent($name, $action, $priority = 0)
+    {
+        $this->events->attach($name, $action, $priority);
+        return $this;
+    }
+
+    /**
+     * Get the event Manager
+     *
+     * @return \Pop\Event\Manager
+     */
+    public function getEventManager()
+    {
+        return $this->events;
     }
 
     /**
@@ -334,17 +435,24 @@ class Pop
      */
     public function run()
     {
+        // Populate necessary variables
         $uri = $this->getUriAction($this->request->getRequestUri());
         $route = $this->routes[strtolower($this->request->getMethod())];
         $params = array();
 
+        // Trigger any pre-route events
+        $this->events->trigger('route.pre', array('project' => $this));
+
+        // Get params for the route
         if (isset($route[$uri])) {
             $params = $this->getRequestParams($route[$uri]);
         }
 
+        // If the route is valid, call the assigned action
         if ($this->isValidRequest($uri) && (count($params) == count($route[$uri]['params']))) {
             $params = $this->getRequestParams($route[$uri]);
             $this->result = call_user_func_array($route[$uri]['action'], $params);
+        // Else, trigger the error action
         } else {
             if (null !== $this->routes['error']) {
                 $this->result = call_user_func_array($this->routes['error'], array());
@@ -353,6 +461,10 @@ class Pop
             }
         }
 
+        // Trigger any post-route events
+        $this->events->trigger('route.post', array('project' => $this));
+
+        // If the result is a model object, send it to the view object and send response
         if ((null !== $this->result) && ($this->result instanceof Mvc\Model)) {
             if ($this->response->getCode() == 200) {
                 $viewFile = ($uri == '/') ? '/index.phtml' : $uri . '.phtml';
@@ -360,9 +472,18 @@ class Pop
                 $viewFile = '/error.phtml';
             }
 
+            // Create the view object
             $this->view = Mvc\View::factory($this->viewPath . $viewFile, $this->result);
+
+            // Trigger any pre-dispatch events
+            $this->events->trigger('dispatch.pre', array('project' => $this));
+
+            // Set the response body and send the response
             $this->response->setBody($this->view->render(true));
             $this->response->send();
+
+            // Trigger any post-dispatch events
+            $this->events->trigger('dispatch.post', array('project' => $this));
         }
     }
 
@@ -469,8 +590,17 @@ class Pop
         $sep = (strpos($class, '\\') !== false) ? '\\' : '_';
         $classFile = str_replace($sep, DIRECTORY_SEPARATOR, $class) . '.php';
 
-        if (strpos($class, 'Pop') !== false) {
-            $classFile = realpath(__DIR__ . '/../' . $classFile);
+        // Check to see if the prefix is registered with the autoloader
+        $prefix = null;
+        foreach ($this->prefixes as $key => $value) {
+            if (strpos($class, $key) !== false) {
+                $prefix = $key;
+            }
+        }
+
+        // If the prefix was found, append the correct directory
+        if (null !== $prefix) {
+            $classFile = $this->prefixes[$prefix] . DIRECTORY_SEPARATOR . $classFile;
         }
 
         if (!@include_once($classFile)) {
