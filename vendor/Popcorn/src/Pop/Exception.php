@@ -1,13 +1,13 @@
 <?php
 /**
- * Pop PHP Framework
+ * Popcorn Micro-Framework
  *
  * LICENSE
  *
  * This source file is subject to the new BSD license that is bundled
  * with this package in the file LICENSE.TXT.
  * It is also available through the world-wide-web at this URL:
- * http://www.popphp.org/LICENSE.TXT
+ * https://raw.github.com/nicksagona/Popcorn/master/LICENSE.TXT
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to info@popphp.org so we can send you a copy immediately.
@@ -16,7 +16,7 @@
  * @package    Pop
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2012 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
+ * @license    https://raw.github.com/nicksagona/Popcorn/master/LICENSE.TXT     New BSD License
  */
 
 /**
@@ -25,13 +25,13 @@
 namespace Pop;
 
 /**
- * This is the Pop Exception class.
+ * This is the Pop Exception class for Popcorn.
  *
  * @category   Pop
  * @package    Pop
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2012 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
- * @version    1.1.0
+ * @license    https://raw.github.com/nicksagona/Popcorn/master/LICENSE.TXT     New BSD License
+ * @version    1.0.0
  */
 class Exception extends \Exception {}

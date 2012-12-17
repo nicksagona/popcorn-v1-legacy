@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE phpunit [
+    <!ELEMENT dataset (table+)>
+    <!ELEMENT table (column*, row*)>
+    <!ATTLIST table
+         name CDATA #REQUIRED
+    >
+    <!ELEMENT column (#PCDATA)>
+    <!ELEMENT row (value | null)*>
+    <!ELEMENT value (#PCDATA)>
+    <!ELEMENT null EMPTY>
+]>
+<phpunit>
+    <testsuites>
+        <testsuite name="Popcorn Micro-Framework PHPUnit Test">
+            <directory>./PopcornTest</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <blacklist>
+            <directory suffix=".php">/usr/lib/php</directory>
+            <directory suffix=".php">C:/PHP</directory>
+            <directory suffix=".php">C:/PROGRA~1/PHP</directory>
+        </blacklist>
+        <whitelist addUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">../src</directory>
+            <exclude>
+                <directory>../src/Pop/Event</directory>
+                <directory>../src/Pop/Http</directory>
+                <directory>../src/Pop/Mvc</directory>
+                <directory>../src/Pop/Web</directory>
+                <file>../src/Pop/Config.php</file>
+            </exclude>
+        </whitelist>
+    </filter>
+    <logging>
+        <log type="coverage-html" target="/tmp/popcorn-cc-report" charset="UTF-8"
+            yui="true" highlight="false" showUncoveredFiles="true"
+            lowUpperBound="35" highLowerBound="70" />
+    </logging>
+</phpunit>
