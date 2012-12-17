@@ -86,3 +86,29 @@ $pop->error(array(new Foo(), 'error'));
 
 $pop->run();
 </pre>
+
+### A Wildcard Example
+<pre>
+$pop = new Pop\Pop();
+
+// The variable $name is populated with an array of values
+// from the URI, such as: /hello/john/t/doe
+$pop->get('/hello/:name*', function($name) {
+    // Dumps array('john', 't', 'doe');
+    print_r($name);
+});
+
+$pop->run();
+</pre>
+
+### A Multiple Routes Example
+<pre>
+$func = function($id) {
+    // Some function that handles GET, POST, etc.
+}
+
+$pop = new Pop\Pop();
+$pop->route('get,post', '/user/:id', $func($id));
+
+$pop->run();
+</pre>
