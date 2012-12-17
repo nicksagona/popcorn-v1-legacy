@@ -327,6 +327,37 @@ class Pop
     }
 
     /**
+     * Add an action to multiple routes
+     *
+     * @param  string $methods
+     * @param  string $uri
+     * @param  mixed $action
+     * @throws Exception
+     * @return \Pop\Pop
+     */
+    public function route($methods, $uri = null, $action)
+    {
+        // Get methods
+        $methods = explode(',', str_replace(', ', ',', $methods));
+
+        // Loop through the methods, validating and storing their URIs/actions
+        foreach ($methods as $method) {
+            $method = strtolower($method);
+            if (!array_key_exists($method, $this->routes)) {
+                throw new Exception('Error: One or more of the methods are not valid.');
+            }
+            if ($method == 'error') {
+                $this->error($action);
+            } else {
+                if (null === $uri) {
+                    throw new Exception('Error: You must assign a URI to an action routed to the ' . strtoupper($method) . ' method.');
+                }
+                $this->$method($uri, $action);
+            }
+        }
+    }
+
+    /**
      * Method to get the config object
      *
      * @return \Pop\Config
