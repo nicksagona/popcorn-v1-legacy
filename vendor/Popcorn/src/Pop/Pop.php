@@ -115,8 +115,11 @@ class Pop
      */
     public function __construct(array $config = array(), $changes = false)
     {
+        // Register the autoloader
         spl_autoload_register($this, true, true);
         $this->register('Pop', __DIR__ . '/../');
+
+        // Create necessary project properties and objects
         $this->request = new \Pop\Http\Request();
         $this->response = new \Pop\Http\Response();
         $this->events = new \Pop\Event\Manager();
