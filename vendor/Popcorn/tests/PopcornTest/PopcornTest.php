@@ -77,9 +77,12 @@ class PopcornTest extends \PHPUnit_Framework_TestCase
 
     public function testEvent()
     {
+        $func = function() { echo 123; };
         $pop = new \Pop\Pop();
-        $pop->attachEvent('route.pre', function() { echo 123; }, 2);
+        $pop->attachEvent('route.pre', $func, 2);
         $this->assertEquals(1, count($pop->getEventManager()->get('route.pre')));
+        $pop->detachEvent('route.pre', $func);
+        $this->assertEquals(0, count($pop->getEventManager()->get('route.pre')));
     }
 
     public function testGetRoute()

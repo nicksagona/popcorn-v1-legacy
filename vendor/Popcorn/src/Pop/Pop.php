@@ -387,6 +387,25 @@ class Pop
     }
 
     /**
+     * Detach an event. Default project event name hook-points are:
+     *
+     *   route.pre
+     *   route.post
+     *   dispatch.pre
+     *   dispatch.post
+     *
+     * @param  string $name
+     * @param  mixed  $action
+     * @return \Pop\Pop
+     */
+    public function detachEvent($name, $action)
+    {
+        $this->events->detach($name, $action);
+        return $this;
+    }
+
+
+    /**
      * Get the event Manager
      *
      * @return \Pop\Event\Manager
