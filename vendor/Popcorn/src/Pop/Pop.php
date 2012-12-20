@@ -541,6 +541,105 @@ class Pop
     }
 
     /**
+     * Get additional components
+     *
+     * @param  array $argv
+     * @return void
+     */
+    public static function getComponents($argv)
+    {
+        $installDir = realpath(__DIR__);
+
+        $xmlObj = null;
+        $commands = array(
+            'help',
+            'list',
+            'install',
+            'remove'
+        );
+        $xml = array(
+            'base'       => null,
+            'version'    => null,
+            'required'   => null,
+            'components' => array()
+        );
+
+        if (($xmlObj =@ new \SimpleXMLElement('http://popcorn.popphp.org/components/popcorn.xml', LIBXML_NOWARNING, true)) !== false) {
+            $xml['base'] = (string)$xmlObj->attributes()->base;
+            $xml['version'] = (string)$xmlObj->attributes()->version;
+            $xml['required'] = (string)$xmlObj->attributes()->required;
+
+            foreach ($xmlObj->component as $item) {
+                $comp = (string)$item->attributes()->name;
+                $xml['components'][$comp] = array();
+                if ($item->count() > 0) {
+                    $children = $item->children();
+                    foreach ($children as $child) {
+                        $xml['components'][$comp][] = (string)$child->attributes()->name;
+                    }
+                }
+            }
+            if (!isset($argv[1])) {
+                echo PHP_EOL . 'You must pass a command parameter, i.e. \'install\' or \'remove\'.' . PHP_EOL;
+                echo PHP_EOL;
+                exit(0);
+            } else if (!in_array($argv[1], $commands)) {
+                echo PHP_EOL . 'That is not a valid command. Available commands are \'' . implode('\', \'', $commands) . '\'' . PHP_EOL;
+                echo PHP_EOL;
+                exit(0);
+            }
+
+            $command = $argv[1];
+            $parameters = $argv;
+            array_shift($parameters);
+            array_shift($parameters);
+
+            if (($command == 'install') || ($command == 'remove')) {
+                if (!isset($parameters[0])) {
+                    echo PHP_EOL . 'You must pass at least one component to install or remove.' . PHP_EOL;
+                    echo PHP_EOL;
+                    exit(0);
+                }
+                foreach ($parameters as $comp) {
+                    if (!array_key_exists($comp, $xml['components'])) {
+                        echo PHP_EOL . 'That component is not available. Use \'./pop list\' to list the available components.' . PHP_EOL;
+                        echo PHP_EOL;
+                        exit(0);
+                    }
+                }
+            }
+
+            switch ($command) {
+                case 'help':
+                    echo PHP_EOL . 'Help for Popcorn:';
+                    echo PHP_EOL . '=================' . PHP_EOL;
+                    echo "  help\t\t\tDisplay this help" . PHP_EOL;
+                    echo "  list\t\t\tList available components" . PHP_EOL;
+                    echo "  install Comp1 Comp2\tInstall components" . PHP_EOL;
+                    echo "  remove Comp1 Comp2\tRemove components" . PHP_EOL;
+                    echo PHP_EOL;
+                    break;
+                case 'list':
+                    echo PHP_EOL . 'Available Components for Popcorn:';
+                    echo PHP_EOL . '=================================' . PHP_EOL;
+                    foreach ($xml['components'] as $comp => $value) {
+                        echo '  ' . $comp . PHP_EOL;
+                    }
+                    echo PHP_EOL;
+                    break;
+                case 'install':
+                    break;
+                case 'remove':
+                    break;
+            }
+        } else {
+            echo 'The component URL cannot be read at this time.' . PHP_EOL;
+            exit(0);
+        }
+
+    }
+
+    /**
      * Method to get the URI action
      *
      * @param  string $uri
