@@ -2,13 +2,40 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd -P )"
 CYG_PATH="$( which cygpath )"
+TAR="$( which tar )"
+ZIP="$( which unzip )"
+EXT=
+CMD=
 
-if [ "$CYG_PATH" != "" ]; then
-    SCRIPT_PATH="$( cygpath -w $SCRIPT_DIR )\\pop.php $@"
-    SCRIPT_PATH=${SCRIPT_PATH//\\/\/}
-else
-    SCRIPT_PATH="$SCRIPT_DIR/pop.php $@"
+if [ "$TAR" != "" ]; then
+    EXT=".tar.gz"
+    CMD=$( which tar )" -C ../vendor/Popcorn/src/Pop -xpf"
+elif [ "$ZIP" != "" ]; then
+    EXT=".zip"
+    CMD=$( which unzip )
 fi
 
-php $SCRIPT_PATH
+if [ "$EXT" == "" ]; then
+    echo -e "\nYou need at least the TAR or ZIP program to install the components.\n"
+fi
 
+
+if [ "$CYG_PATH" != "" ]; then
+    SCRIPT_PATH="$( cygpath -w $SCRIPT_DIR )\\pop.php $EXT $@"
+    SCRIPT_PATH=${SCRIPT_PATH//\\/\/}
+else
+    SCRIPT_PATH="$SCRIPT_DIR/pop.php $EXT $@"
+fi
+
+#php $SCRIPT_PATH
+
+FILES=$( ls ../vendor/Popcorn/src/Pop/*"$EXT" )
+
+for F in $FILES
+do
+    echo -e "Unpacking $F..."
+    $CMD $F
+    rm $F
+done
+
+echo -e "\nComplete!"

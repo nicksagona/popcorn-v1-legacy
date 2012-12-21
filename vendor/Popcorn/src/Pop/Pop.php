@@ -108,7 +108,7 @@ class Pop
      * Component URL
      * @var string
      */
-    protected $url = 'http://popcorn.popphp.org/components/popcorn.xml';
+    protected $url = 'http://popcorn.popphp.org/components/';
 
     /**
      * Array of available CLI commands
@@ -575,7 +575,7 @@ class Pop
             'components' => array()
         );
 
-        if (($xmlObj =@ new \SimpleXMLElement($this->url, LIBXML_NOWARNING, true)) !== false) {
+        if (($xmlObj =@ new \SimpleXMLElement($this->url . 'popcorn.xml', LIBXML_NOWARNING, true)) !== false) {
             $xml['base'] = (string)$xmlObj->attributes()->base;
             $xml['version'] = (string)$xmlObj->attributes()->version;
             $xml['required'] = (string)$xmlObj->attributes()->required;
@@ -590,14 +590,16 @@ class Pop
                     }
                 }
             }
-            if (!isset($argv[1])) {
+            if (!isset($argv[2])) {
                 throw new Exception('You must pass a command parameter, i.e. \'install\' or \'remove\'.');
-            } else if (!in_array($argv[1], $this->commands)) {
+            } else if (!in_array($argv[2], $this->commands)) {
                 throw new Exception('That is not a valid command. Available commands are \'' . implode('\', \'', $this->commands) . '\'.');
             }
 
-            $command = $argv[1];
+            $ext = $argv[1];
+            $command = $argv[2];
             $parameters = $argv;
+            array_shift($parameters);
             array_shift($parameters);
             array_shift($parameters);
 
@@ -639,18 +641,48 @@ class Pop
                     echo PHP_EOL;
 
                     foreach ($parameters as $parameter) {
-                        echo 'Downloading ' . $parameter . '...' . PHP_EOL;
+                        echo 'Downloading ' . $parameter;
+                        $this->download($parameter, $ext);
+                        echo PHP_EOL;
                     }
-                    echo 'Complete!' . PHP_EOL;
                     echo PHP_EOL;
                     break;
                 case 'remove':
                     break;
             }
+
         } else {
             throw new Exception('The component URL cannot be read at this time.');
         }
 
+    }
+
+    /**
+     * Method to get the URI action
+     *
+     * @param  string $component
+     * @param  string $ext
+     * @return void
+     */
+    protected function download($component, $ext)
+    {
+        $archive = __DIR__ . DIRECTORY_SEPARATOR . $component . $ext;
+        $file = fopen ($this->url . '/' . $component . $ext, "rb");
+        if ($file) {
+            $arc = fopen ($archive, "wb");
+            if ($arc) {
+                while(!feof($file)) {
+                    echo '.';
+                    fwrite($arc, fread($file, 1024 * 8 ), 1024 * 8 );
+                }
+            }
+        }
+        if ($file) {
+            fclose($file);
+        }
+        if ($arc) {
+            fclose($arc);
+        }
     }
 
     /**
