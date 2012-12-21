@@ -40,7 +40,7 @@ class Pop
     /**
      * Current version
      */
-    const VERSION = '1.0';
+    const VERSION = '1.0.0';
 
     /**
      * Array of available namespaces prefixes.
@@ -541,12 +541,13 @@ class Pop
     }
 
     /**
-     * Get additional components
+     * Run the CLI to manage additional components
      *
      * @param  array $argv
+     * @throws Exception
      * @return void
      */
-    public static function getComponents($argv)
+    public function cli($argv)
     {
         $installDir = realpath(__DIR__);
 
@@ -555,7 +556,8 @@ class Pop
             'help',
             'list',
             'install',
-            'remove'
+            'remove',
+            'version'
         );
         $xml = array(
             'base'       => null,
@@ -580,13 +582,9 @@ class Pop
                 }
             }
             if (!isset($argv[1])) {
-                echo PHP_EOL . 'You must pass a command parameter, i.e. \'install\' or \'remove\'.' . PHP_EOL;
-                echo PHP_EOL;
-                exit(0);
+                throw new Exception('You must pass a command parameter, i.e. \'install\' or \'remove\'.');
             } else if (!in_array($argv[1], $commands)) {
-                echo PHP_EOL . 'That is not a valid command. Available commands are \'' . implode('\', \'', $commands) . '\'' . PHP_EOL;
-                echo PHP_EOL;
-                exit(0);
+                throw new Exception('That is not a valid command. Available commands are \'' . implode('\', \'', $commands) . '\'');
             }
 
             $command = $argv[1];
@@ -596,24 +594,25 @@ class Pop
 
             if (($command == 'install') || ($command == 'remove')) {
                 if (!isset($parameters[0])) {
-                    echo PHP_EOL . 'You must pass at least one component to install or remove.' . PHP_EOL;
-                    echo PHP_EOL;
-                    exit(0);
+                    throw new Exception('You must pass at least one component to install or remove.');
                 }
                 foreach ($parameters as $comp) {
                     if (!array_key_exists($comp, $xml['components'])) {
-                        echo PHP_EOL . 'That component is not available. Use \'./pop list\' to list the available components.' . PHP_EOL;
-                        echo PHP_EOL;
-                        exit(0);
+                        throw new Exception('One or more of the components is not available. Use \'./pop list\' to list the available components.');
                     }
                 }
             }
 
             switch ($command) {
+                case 'version':
+                    echo PHP_EOL . 'Popcorn v' . self::VERSION . ' is installed.' . PHP_EOL;
+                    echo 'The packages are for Popcorn v' . $xml['version'] . ' which require components from Pop PHP Framework v' . $xml['required'] . '.' . PHP_EOL . PHP_EOL;
+                    break;
                 case 'help':
                     echo PHP_EOL . 'Help for Popcorn:';
                     echo PHP_EOL . '=================' . PHP_EOL;
                     echo "  help\t\t\tDisplay this help" . PHP_EOL;
+                    echo "  version\t\tDisplay the version" . PHP_EOL;
                     echo "  list\t\t\tList available components" . PHP_EOL;
                     echo "  install Comp1 Comp2\tInstall components" . PHP_EOL;
                     echo "  remove Comp1 Comp2\tRemove components" . PHP_EOL;
@@ -633,8 +632,7 @@ class Pop
                     break;
             }
         } else {
-            echo 'The component URL cannot be read at this time.' . PHP_EOL;
-            exit(0);
+            throw new Exception('The component URL cannot be read at this time.');
         }
 
     }

@@ -3,4 +3,10 @@
 
 require_once '../vendor/Popcorn/src/Pop/Pop.php';
 
-Pop\Pop::getComponents($argv);
+try {
+    $pop = new Pop\Pop();
+    $pop->cli($argv);
+} catch (Exception $e) {
+    echo PHP_EOL . $e->getMessage() . PHP_EOL;
+    echo 'Run \'./pop help\' for help.'. PHP_EOL . PHP_EOL;
+}
