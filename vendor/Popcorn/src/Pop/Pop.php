@@ -105,6 +105,24 @@ class Pop
     protected $result = null;
 
     /**
+     * Component URL
+     * @var string
+     */
+    protected $url = 'http://popcorn.popphp.org/components/popcorn.xml';
+
+    /**
+     * Array of available CLI commands
+     * @var array
+     */
+    protected $commands = array(
+        'help',
+        'list',
+        'install',
+        'remove',
+        'version'
+    );
+
+    /**
      * Constructor
      *
      * Instantiate a Pop object
@@ -549,16 +567,7 @@ class Pop
      */
     public function cli($argv)
     {
-        $installDir = realpath(__DIR__);
-
         $xmlObj = null;
-        $commands = array(
-            'help',
-            'list',
-            'install',
-            'remove',
-            'version'
-        );
         $xml = array(
             'base'       => null,
             'version'    => null,
@@ -566,7 +575,7 @@ class Pop
             'components' => array()
         );
 
-        if (($xmlObj =@ new \SimpleXMLElement('http://popcorn.popphp.org/components/popcorn.xml', LIBXML_NOWARNING, true)) !== false) {
+        if (($xmlObj =@ new \SimpleXMLElement($this->url, LIBXML_NOWARNING, true)) !== false) {
             $xml['base'] = (string)$xmlObj->attributes()->base;
             $xml['version'] = (string)$xmlObj->attributes()->version;
             $xml['required'] = (string)$xmlObj->attributes()->required;
@@ -583,8 +592,8 @@ class Pop
             }
             if (!isset($argv[1])) {
                 throw new Exception('You must pass a command parameter, i.e. \'install\' or \'remove\'.');
-            } else if (!in_array($argv[1], $commands)) {
-                throw new Exception('That is not a valid command. Available commands are \'' . implode('\', \'', $commands) . '\'');
+            } else if (!in_array($argv[1], $this->commands)) {
+                throw new Exception('That is not a valid command. Available commands are \'' . implode('\', \'', $this->commands) . '\'.');
             }
 
             $command = $argv[1];
@@ -627,6 +636,13 @@ class Pop
                     echo PHP_EOL;
                     break;
                 case 'install':
+                    echo PHP_EOL;
+
+                    foreach ($parameters as $parameter) {
+                        echo 'Downloading ' . $parameter . '...' . PHP_EOL;
+                    }
+                    echo 'Complete!' . PHP_EOL;
+                    echo PHP_EOL;
                     break;
                 case 'remove':
                     break;
