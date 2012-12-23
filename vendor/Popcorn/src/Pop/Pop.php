@@ -676,10 +676,12 @@ class Pop
                     }
 
                     foreach ($comps as $comp) {
-                        echo 'Removing ' . $comp;
-                        $dir = new File\Dir(__DIR__ . DIRECTORY_SEPARATOR . $comp);
-                        $dir->emptyDir(null, true);
-                        echo PHP_EOL;
+                        if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . $comp)) {
+                            echo 'Removing ' . $comp;
+                            $dir = new File\Dir(__DIR__ . DIRECTORY_SEPARATOR . $comp);
+                            $dir->emptyDir(null, true);
+                            echo PHP_EOL;
+                        }
                     }
 
                     echo PHP_EOL . 'Complete!' . PHP_EOL;
