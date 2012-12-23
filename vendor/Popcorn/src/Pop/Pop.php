@@ -622,7 +622,7 @@ class Pop
                 case 'help':
                     echo PHP_EOL . 'Help for Popcorn:';
                     echo PHP_EOL . '=================' . PHP_EOL;
-                    echo PHP_EOL . wordwrap('The Popcorn CLI interface serves as a dependency manager and allows you to install or remove certain components from the Pop PHP Framework to use with Popcorn.', 70, PHP_EOL) . PHP_EOL . PHP_EOL;
+                    echo PHP_EOL . wordwrap('The Popcorn CLI interface serves as a dependency manager and allows you to install or remove certain components from the Pop PHP Framework to use with Popcorn. It requires either the TAR or ZIP program to be installed.', 80, PHP_EOL) . PHP_EOL . PHP_EOL;
                     echo "  help\t\t\tDisplay this help" . PHP_EOL;
                     echo "  version\t\tDisplay the version" . PHP_EOL;
                     echo "  list\t\t\tList available components" . PHP_EOL;
