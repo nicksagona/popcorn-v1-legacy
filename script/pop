@@ -27,15 +27,17 @@ else
     SCRIPT_PATH="$SCRIPT_DIR/pop.php $EXT $@"
 fi
 
-#php $SCRIPT_PATH
+php $SCRIPT_PATH
 
-FILES=$( ls ../vendor/Popcorn/src/Pop/*"$EXT" )
+if [ "$1" = "install" ]; then
+    FILES=$( ls ../vendor/Popcorn/src/Pop/*"$EXT" )
 
-for F in $FILES
-do
-    echo -e "Unpacking $F..."
-    $CMD $F
-    rm $F
-done
+    for F in $FILES
+    do
+        echo -e "Unpacking $F..."
+        $CMD $F
+        rm $F
+    done
+fi
 
 echo -e "\nComplete!"

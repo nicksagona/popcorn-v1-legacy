@@ -639,13 +639,25 @@ class Pop
                     break;
                 case 'install':
                     echo PHP_EOL;
+                    $comps = array();
 
                     foreach ($parameters as $parameter) {
-                        echo 'Downloading ' . $parameter;
-                        $this->download($parameter, $ext);
-                        echo PHP_EOL;
+                        $comps[] = $parameter;
+                        if (count($xml['components'][$parameter]) > 0) {
+                            foreach ($xml['components'][$parameter] as $param) {
+                                if (!in_array($param, $comps)) {
+                                    $comps[] = $param;
+                                }
+                            }
+                        }
                     }
-                    echo PHP_EOL;
+
+                    foreach ($comps as $comp) {
+                        echo 'Downloading ' . $comp;
+                        $this->download($comp, $ext);
+                        echo PHP_EOL;
+
+                    }
                     break;
                 case 'remove':
                     break;
