@@ -617,11 +617,12 @@ class Pop
             switch ($command) {
                 case 'version':
                     echo PHP_EOL . 'Popcorn v' . self::VERSION . ' is installed.' . PHP_EOL;
-                    echo 'The packages are for Popcorn v' . $xml['version'] . ' which require components from Pop PHP Framework v' . $xml['required'] . '.' . PHP_EOL . PHP_EOL;
+                    echo 'This version requires components from Pop PHP Framework v' . $xml['required'] . '.' . PHP_EOL . PHP_EOL;
                     break;
                 case 'help':
                     echo PHP_EOL . 'Help for Popcorn:';
                     echo PHP_EOL . '=================' . PHP_EOL;
+                    echo PHP_EOL . wordwrap('The Popcorn CLI interface serves as a dependency manager and allows you to install or remove certain components from the Pop PHP Framework to use with Popcorn.', 70, PHP_EOL) . PHP_EOL . PHP_EOL;
                     echo "  help\t\t\tDisplay this help" . PHP_EOL;
                     echo "  version\t\tDisplay the version" . PHP_EOL;
                     echo "  list\t\t\tList available components" . PHP_EOL;
@@ -660,6 +661,28 @@ class Pop
                     }
                     break;
                 case 'remove':
+                    echo PHP_EOL;
+                    $comps = array();
+
+                    foreach ($parameters as $parameter) {
+                        $comps[] = $parameter;
+                        if (count($xml['components'][$parameter]) > 0) {
+                            foreach ($xml['components'][$parameter] as $param) {
+                                if (!in_array($param, $comps)) {
+                                    $comps[] = $param;
+                                }
+                            }
+                        }
+                    }
+
+                    foreach ($comps as $comp) {
+                        echo 'Removing ' . $comp;
+                        $dir = new File\Dir(__DIR__ . DIRECTORY_SEPARATOR . $comp);
+                        $dir->emptyDir(null, true);
+                        echo PHP_EOL;
+                    }
+
+                    echo PHP_EOL . 'Complete!' . PHP_EOL;
                     break;
             }
 

@@ -24,5 +24,7 @@ if "%1" == "install" (
         %CMD% ../vendor/Popcorn/src/Pop/%%i
         del ..\vendor\Popcorn\src\Pop\%%i
     )
+
+    echo Complete!
 )
 

@@ -38,6 +38,6 @@ if [ "$1" = "install" ]; then
         $CMD $F
         rm $F
     done
-fi
 
-echo -e "\nComplete!"
+    echo -e "\nComplete!"
+fi
