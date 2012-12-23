@@ -1,13 +1,28 @@
 @echo off
 
-SET TAR=1
-SET ZIP=1
-FOR /f "delims=" %%i in ('where tar') do set TAR=%%i
-FOR /f "delims=" %%i in ('where zip') do set ZIP=%%i
+SET TAR=
+SET ZIP=
+SET EXT=
+SET CMD=
+FOR /f "delims=" %%i IN ('where tar') DO SET TAR=%%i
+FOR /f "delims=" %%i IN ('where zip') DO SET ZIP=%%i
 
-REM echo %TAR%
-REM echo %ZIP%
+IF NOT "%TAR" == "" (
+    SET EXT=.tar.gz
+    SET CMD=tar -C ../vendor/Popcorn/src/Pop -xpf
+) ELSE IF NOT "%ZIP" == "" (
+    SET EXT=.zip
+    SET CMD=unzip -d ../vendor/Popcorn/src/Pop
+)
 
-REM SET SCRIPT_DIR=%~dp0
-REM php %SCRIPT_DIR%pop.php %*
+SET SCRIPT_DIR=%~dp0
+REM php %SCRIPT_DIR%pop.php %EXT% %*
+
+if "%1" == "install" (
+    FOR /f "delims=" %%i IN ('dir /B ..\vendor\Popcorn\src\Pop\*%EXT%') DO (
+        echo Unpacking %%i...
+        %CMD% ../vendor/Popcorn/src/Pop/%%i
+        del ..\vendor\Popcorn\src\Pop\%%i
+    )
+)
 
