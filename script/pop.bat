@@ -16,7 +16,7 @@ IF NOT "%TAR" == "" (
 )
 
 SET SCRIPT_DIR=%~dp0
-REM php %SCRIPT_DIR%pop.php %EXT% %*
+php %SCRIPT_DIR%pop.php %EXT% %*
 
 if "%1" == "install" (
     FOR /f "delims=" %%i IN ('dir /B ..\vendor\Popcorn\src\Pop\*%EXT%') DO (
