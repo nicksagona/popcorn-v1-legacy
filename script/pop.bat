@@ -13,6 +13,9 @@ IF NOT "%TAR" == "" (
 ) ELSE IF NOT "%ZIP" == "" (
     SET EXT=.zip
     SET CMD=unzip -d ../vendor/Popcorn/src/Pop
+) ELSE (
+    echo You need at least the TAR or ZIP program to install the components.
+    exit /b
 )
 
 SET SCRIPT_DIR=%~dp0

@@ -13,10 +13,9 @@ if [ "$TAR" != "" ]; then
 elif [ "$ZIP" != "" ]; then
     EXT=".zip"
     CMD=$( which unzip )" -d ../vendor/Popcorn/src/Pop"
-fi
-
-if [ "$EXT" == "" ]; then
+else
     echo -e "\nYou need at least the TAR or ZIP program to install the components.\n"
+    exit 0
 fi
 
 
