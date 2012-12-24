@@ -28,15 +28,23 @@ fi
 
 php $SCRIPT_PATH
 
-if [ "$1" = "install" ]; then
-    FILES=$( ls ../vendor/Popcorn/src/Pop/*"$EXT" )
+if [ "$1" = "install" ] && [ "$2" != "" ]; then
+    if [ "$2" = "all" ]; then
+        TESTFILE="../vendor/Popcorn/src/Pop/Archive$EXT"
+    else
+        TESTFILE="../vendor/Popcorn/src/Pop/$2$EXT"
+    fi
 
-    for F in $FILES
-    do
-        echo -e "Unpacking $F..."
-        $CMD $F
-        rm $F
-    done
+    if [ -f $TESTFILE ]; then
+        FILES=$( ls ../vendor/Popcorn/src/Pop/*"$EXT" )
 
-    echo -e "\nComplete!"
+        for F in $FILES
+        do
+            echo -e "Unpacking $F..."
+            $CMD $F
+            rm $F
+        done
+
+        echo -e "\nComplete!"
+    fi
 fi

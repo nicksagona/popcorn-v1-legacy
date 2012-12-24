@@ -123,6 +123,18 @@ class Pop
     );
 
     /**
+     * Array of default components
+     * @var array
+     */
+    protected $defaults = array(
+        'Event',
+        'File',
+        'Http',
+        'Mvc',
+        'Web'
+    );
+
+    /**
      * Constructor
      *
      * Instantiate a Pop object
@@ -575,6 +587,7 @@ class Pop
             'components' => array()
         );
 
+        // Parse the XML file
         if (($xmlObj =@ new \SimpleXMLElement($this->url . 'popcorn.xml', LIBXML_NOWARNING, true)) !== false) {
             $xml['base'] = (string)$xmlObj->attributes()->base;
             $xml['version'] = (string)$xmlObj->attributes()->version;
@@ -590,10 +603,15 @@ class Pop
                     }
                 }
             }
+
+            // Validate command parameter
             if (!isset($argv[2])) {
                 throw new Exception('You must pass a command parameter, i.e. \'install\' or \'remove\'.');
             } else if (!in_array($argv[2], $this->commands)) {
-                throw new Exception('That is not a valid command. Available commands are \'' . implode('\', \'', $this->commands) . '\'.');
+                throw new Exception(
+                    'That is not a valid command. Available commands are \'' .
+                    implode('\', \'', $this->commands) . '\'.'
+                );
             }
 
             $ext = $argv[1];
@@ -603,22 +621,37 @@ class Pop
             array_shift($parameters);
             array_shift($parameters);
 
+            // Validate component parameters
             if (($command == 'install') || ($command == 'remove')) {
                 if (!isset($parameters[0])) {
                     throw new Exception('You must pass at least one component to install or remove.');
                 }
-                foreach ($parameters as $comp) {
-                    if (!array_key_exists($comp, $xml['components'])) {
-                        throw new Exception('One or more of the components is not available. Use \'./pop list\' to list the available components.');
+                if (strtolower($parameters[0]) != 'all') {
+                    foreach ($parameters as $comp) {
+                        if (!array_key_exists($comp, $xml['components'])) {
+                            if (in_array($comp, $this->defaults)) {
+                                $msg = 'One or more of the components is a default component. It cannot be installed or removed.' .
+                                    PHP_EOL . 'Use \'./pop list\' to list the available components.';
+                            } else {
+                                $msg = 'One or more of the components is not available.' .
+                                    PHP_EOL . 'Use \'./pop list\' to list the available components.';
+                            }
+                            throw new Exception($msg);
+                        }
                     }
                 }
             }
 
+            // Execute command
             switch ($command) {
+                // Show the version
                 case 'version':
                     echo PHP_EOL . 'Popcorn v' . self::VERSION . ' is installed.' . PHP_EOL;
-                    echo 'This version requires components from Pop PHP Framework v' . $xml['required'] . '.' . PHP_EOL . PHP_EOL;
+                    echo 'This version requires components from Pop PHP Framework v' .
+                        $xml['required'] . '.' . PHP_EOL . PHP_EOL;
                     break;
+
+                // Display help
                 case 'help':
                     echo PHP_EOL . 'Help for Popcorn:';
                     echo PHP_EOL . '=================' . PHP_EOL;
@@ -627,9 +660,13 @@ class Pop
                     echo "  version\t\tDisplay the version" . PHP_EOL;
                     echo "  list\t\t\tList available components" . PHP_EOL;
                     echo "  install Comp1 Comp2\tInstall components" . PHP_EOL;
+                    echo "  install all\t\tInstall all components" . PHP_EOL;
                     echo "  remove Comp1 Comp2\tRemove components" . PHP_EOL;
+                    echo "  remove all\t\tRemove all components" . PHP_EOL;
                     echo PHP_EOL;
                     break;
+
+                // List available components
                 case 'list':
                     echo PHP_EOL . 'Available Components for Popcorn:';
                     echo PHP_EOL . '=================================' . PHP_EOL;
@@ -638,88 +675,133 @@ class Pop
                     }
                     echo PHP_EOL;
                     break;
+
+                // Install components
                 case 'install':
                     echo PHP_EOL;
                     $comps = array();
 
-                    foreach ($parameters as $parameter) {
-                        $comps[] = $parameter;
-                        if (count($xml['components'][$parameter]) > 0) {
-                            foreach ($xml['components'][$parameter] as $param) {
-                                if (!in_array($param, $comps)) {
-                                    $comps[] = $param;
+                    // If 'all', then install all
+                    if (strtolower($parameters[0]) == 'all') {
+                        $comps = array_keys($xml['components']);
+                    // Else, select which components and their dependencies to install
+                    } else {
+                        foreach ($parameters as $parameter) {
+                            $comps[] = $parameter;
+                            if (count($xml['components'][$parameter]) > 0) {
+                                foreach ($xml['components'][$parameter] as $param) {
+                                    if (!in_array($param, $comps)) {
+                                        $comps[] = $param;
+                                    }
                                 }
                             }
                         }
                     }
 
+                    // Download the component files
                     foreach ($comps as $comp) {
                         echo 'Downloading ' . $comp;
                         $this->download($comp, $ext);
                         echo PHP_EOL;
-
                     }
+
                     break;
+
+                // Remove components
                 case 'remove':
                     echo PHP_EOL;
                     $comps = array();
+                    $installed = array();
+                    $skip = array();
+                    $dir = new File\Dir(__DIR__);
+                    $files = $dir->getFiles();
 
-                    foreach ($parameters as $parameter) {
-                        $comps[] = $parameter;
-                        if (count($xml['components'][$parameter]) > 0) {
-                            foreach ($xml['components'][$parameter] as $param) {
-                                if (!in_array($param, $comps)) {
-                                    $comps[] = $param;
+                    // Check which components are already installed
+                    foreach ($files as $file) {
+                        if (is_dir(__DIR__ . DIRECTORY_SEPARATOR . $file) && !in_array($file, $this->defaults)) {
+                            $installed[] = $file;
+                        }
+                    }
+
+                    // If 'all', then remove all
+                    if (strtolower($parameters[0]) == 'all') {
+                        $comps = array_keys($xml['components']);
+                    // Else, select which components and their dependencies to remove
+                    } else {
+                        foreach ($parameters as $parameter) {
+                            // Collect which to skip based on dependencies
+                            foreach ($installed as $comp) {
+                                if ($comp != $parameter) {
+                                    if (in_array($parameter, $xml['components'][$comp])) {
+                                        if (!isset($skip[$parameter])) {
+                                            $skip[$parameter] = array($comp);
+                                        } else {
+                                            $skip[$parameter][] = $comp;
+                                        }
+                                    }
+                                }
+                                foreach ($installed as $com) {
+                                    if ($comp != $parameter) {
+                                        if (in_array($com, $xml['components'][$comp]) && in_array($com, $xml['components'][$parameter])) {
+                                            if (!isset($skip[$com])) {
+                                                $skip[$com] = array($comp);
+                                            } else {
+                                                $skip[$com][] = $comp;
+                                            }
+
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Collect which to remove
+                            $comps[] = $parameter;
+                            if (count($xml['components'][$parameter]) > 0) {
+                                foreach ($xml['components'][$parameter] as $param) {
+                                    if (!in_array($param, $comps)) {
+                                        $comps[] = $param;
+                                    }
                                 }
                             }
                         }
                     }
 
+                    sort($installed);
+                    sort($comps);
+
+                    // If the same, then nullify any dependency "skip" flags
+                    if ($installed == $comps) {
+                        $skip = array();
+                    }
+
+                    // Begin to remove the components
                     foreach ($comps as $comp) {
-                        if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . $comp)) {
+                        // If require by other installed components
+                        if (array_key_exists($comp, $skip)) {
+                            echo 'Skipping ' . $comp . '. It is required by the following components: ' . implode(', ', $skip[$comp]) . '.';
+                        // If a default component
+                        } else if (in_array($comp, $this->defaults)) {
+                            echo 'Skipping ' . $comp . '. It is a default component.';
+                        // If component is not installed or does not exist
+                        } else if (!file_exists(__DIR__ . DIRECTORY_SEPARATOR . $comp)) {
+                            echo 'Skipping ' . $comp . '. ' . (array_key_exists($comp, $xml['components']) ? 'It is not installed.' : 'It does not exist');
+                        // Else, remove it
+                        } else {
                             echo 'Removing ' . $comp;
                             $dir = new File\Dir(__DIR__ . DIRECTORY_SEPARATOR . $comp);
                             $dir->emptyDir(null, true);
-                            echo PHP_EOL;
                         }
+                        echo PHP_EOL;
                     }
 
                     echo PHP_EOL . 'Complete!' . PHP_EOL;
+
                     break;
             }
-
         } else {
             throw new Exception('The component URL cannot be read at this time.');
         }
 
-    }
-
-    /**
-     * Method to get the URI action
-     *
-     * @param  string $component
-     * @param  string $ext
-     * @return void
-     */
-    protected function download($component, $ext)
-    {
-        $archive = __DIR__ . DIRECTORY_SEPARATOR . $component . $ext;
-        $file = fopen ($this->url . '/' . $component . $ext, "rb");
-        if ($file) {
-            $arc = fopen ($archive, "wb");
-            if ($arc) {
-                while(!feof($file)) {
-                    echo '.';
-                    fwrite($arc, fread($file, 1024 * 8 ), 1024 * 8 );
-                }
-            }
-        }
-        if ($file) {
-            fclose($file);
-        }
-        if ($arc) {
-            fclose($arc);
-        }
     }
 
     /**
@@ -812,6 +894,34 @@ class Pop
         $this->response->setCode($code);
 
         return ($code == 200);
+    }
+
+    /**
+     * Method to download a component files
+     *
+     * @param  string $component
+     * @param  string $ext
+     * @return void
+     */
+    protected function download($component, $ext)
+    {
+        $archive = __DIR__ . DIRECTORY_SEPARATOR . $component . $ext;
+        $file = fopen ($this->url . '/' . $component . $ext, "rb");
+        if ($file) {
+            $arc = fopen ($archive, "wb");
+            if ($arc) {
+                while(!feof($file)) {
+                    echo '.';
+                    fwrite($arc, fread($file, 1024 * 8 ), 1024 * 8 );
+                }
+            }
+        }
+        if ($file) {
+            fclose($file);
+        }
+        if ($arc) {
+            fclose($arc);
+        }
     }
 
     /**
