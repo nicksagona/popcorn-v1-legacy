@@ -135,8 +135,11 @@ compatible components from the Pop PHP Framework
 // List available components
 ~/Popcorn/script$ ./pop list
 
-// Install some componentscd Pro
+// Install some components
 ~/Popcorn/script$ ./pop install Db Form
+
+// Remove some components
+~/Popcorn/script$ ./pop remove Auth Record
 </pre>
 
 ### Via Windows Using the Batch Script
@@ -150,4 +153,7 @@ C:\Popcorn\script>pop list
 
 // Install some components
 C:\Popcorn\script>pop install Db Form
+
+// Remove some components
+C:\Popcorn\script>pop remove Auth Record
 </pre>
