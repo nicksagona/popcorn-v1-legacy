@@ -7,12 +7,12 @@ SET CMD=
 FOR /f "delims=" %%i IN ('where tar') DO SET TAR=%%i
 FOR /f "delims=" %%i IN ('where zip') DO SET ZIP=%%i
 
-IF NOT "%TAR" == "" (
+IF "%TAR" == "" (
     SET EXT=.tar.gz
     SET CMD=tar -C ../vendor/Popcorn/src/Pop -xpf
 ) ELSE IF NOT "%ZIP" == "" (
     SET EXT=.zip
-    SET CMD=unzip -d ../vendor/Popcorn/src/Pop
+    SET CMD=unzip -q -d ../vendor/Popcorn/src/Pop
 ) ELSE (
     echo You need at least the TAR or ZIP program to install the components.
     exit /b
@@ -35,9 +35,7 @@ IF "%1" == "install" (
                 %CMD% ../vendor/Popcorn/src/Pop/%%i
                 del ..\vendor\Popcorn\src\Pop\%%i
             )
-
             echo Complete!
         )
     )
 )
-
