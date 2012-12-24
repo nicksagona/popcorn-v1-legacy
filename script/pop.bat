@@ -21,13 +21,23 @@ IF NOT "%TAR" == "" (
 SET SCRIPT_DIR=%~dp0
 php %SCRIPT_DIR%pop.php %EXT% %*
 
-if "%1" == "install" (
-    FOR /f "delims=" %%i IN ('dir /B ..\vendor\Popcorn\src\Pop\*%EXT%') DO (
-        echo Unpacking %%i...
-        %CMD% ../vendor/Popcorn/src/Pop/%%i
-        del ..\vendor\Popcorn\src\Pop\%%i
-    )
+IF "%1" == "install" (
+    IF NOT "%2" == "" (
+        IF "%2" == "all" (
+            SET TESTFILE=..\vendor\Popcorn\src\Pop\Archive%EXT%
+        ) ELSE (
+            SET TEMPFILE=%2%
+            SET TESTFILE=..\vendor\Popcorn\src\Pop\%TEMPFILE%%EXT%
+        )
+        IF EXIST %TESTFILE% (
+            FOR /f "delims=" %%i IN ('dir /B ..\vendor\Popcorn\src\Pop\*%EXT%') DO (
+                echo Unpacking %%i...
+                %CMD% ../vendor/Popcorn/src/Pop/%%i
+                del ..\vendor\Popcorn\src\Pop\%%i
+            )
 
-    echo Complete!
+            echo Complete!
+        )
+    )
 )
 

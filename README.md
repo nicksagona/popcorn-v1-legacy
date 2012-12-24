@@ -20,7 +20,9 @@ FEATURES
 * Event handling
 * Basic web support, such as sessions, cookies, mobile detection, etc.
 * Support for custom view/template management and rendering
-* Autoloading and support for registering other libraries of code.
+* Autoloading and support for registering other libraries of code
+* Package manager for installing or removing compatible components from the Pop PHP Framework
+    - requires the TAR or ZIP programs to be installed
 
 DOCUMENTATION
 -------------
@@ -116,4 +118,36 @@ $pop = new Pop\Pop();
 $pop->route('get,post', '/user/:id', $func($id));
 
 $pop->run();
+</pre>
+
+USING THE PACKAGE MANAGER
+-------------------------
+
+From the command line, you can easily install or remove
+compatible components from the Pop PHP Framework
+
+### Via Linux/Unix Using the Bash Script
+
+<pre>
+// Display help
+~/Popcorn/script$ ./pop help
+
+// List available components
+~/Popcorn/script$ ./pop list
+
+// Install some componentscd Pro
+~/Popcorn/script$ ./pop install Db Form
+</pre>
+
+### Via Windows Using the Batch Script
+
+<pre>
+// Display help
+C:\Popcorn\script>pop help
+
+// List available components
+C:\Popcorn\script>pop list
+
+// Install some components
+C:\Popcorn\script>pop install Db Form
 </pre>
