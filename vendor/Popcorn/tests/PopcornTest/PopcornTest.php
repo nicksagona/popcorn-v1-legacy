@@ -259,5 +259,136 @@ class PopcornTest extends \PHPUnit_Framework_TestCase
         $pop->run();
     }
 
+    public function testCliNoParameterException()
+    {
+        $this->setExpectedException('Pop\Exception');
+        $pop = new \Pop\Pop();
+        $pop->cli(array(
+            '/home/nick/Projects/Popcorn/script/pop.php',
+            '.tar.gz'
+        ));
+    }
+
+    public function testCliBadParameterException()
+    {
+        $this->setExpectedException('Pop\Exception');
+        $pop = new \Pop\Pop();
+        $pop->cli(array(
+            '/home/nick/Projects/Popcorn/script/pop.php',
+            '.tar.gz',
+            'badparam'
+        ));
+    }
+
+    public function testCliInstallDefaultException()
+    {
+        $this->setExpectedException('Pop\Exception');
+        $pop = new \Pop\Pop();
+        $pop->cli(array(
+            '/home/nick/Projects/Popcorn/script/pop.php',
+            '.tar.gz',
+            'install',
+            'Event'
+        ));
+    }
+
+    public function testCliHelp()
+    {
+        $pop = new \Pop\Pop();
+        ob_start();
+        $pop->cli(array(
+            '/home/nick/Projects/Popcorn/script/pop.php',
+            '.tar.gz',
+            'help'
+        ));
+        $output = ob_get_contents();
+        ob_end_clean();
+        $this->assertContains('Help for Popcorn', $output);
+    }
+
+    public function testCliList()
+    {
+        $pop = new \Pop\Pop();
+        ob_start();
+        $pop->cli(array(
+            '/home/nick/Projects/Popcorn/script/pop.php',
+            '.tar.gz',
+            'list'
+        ));
+        $output = ob_get_contents();
+        ob_end_clean();
+        $this->assertContains('Available Components for Popcorn', $output);
+    }
+
+    public function testCliVersion()
+    {
+        $pop = new \Pop\Pop();
+        ob_start();
+        $pop->cli(array(
+            '/home/nick/Projects/Popcorn/script/pop.php',
+            '.tar.gz',
+            'version'
+        ));
+        $output = ob_get_contents();
+        ob_end_clean();
+        $this->assertContains('is installed', $output);
+    }
+
+    public function testCliInstallNoParameterException()
+    {
+        $this->setExpectedException('Pop\Exception');
+        $pop = new \Pop\Pop();
+        $pop->cli(array(
+            '/home/nick/Projects/Popcorn/script/pop.php',
+            '.tar.gz',
+            'install'
+        ));
+    }
+
+    public function testCliInstallBadParameterException()
+    {
+        $this->setExpectedException('Pop\Exception');
+        $pop = new \Pop\Pop();
+        $pop->cli(array(
+            '/home/nick/Projects/Popcorn/script/pop.php',
+            '.tar.gz',
+            'install',
+            'BadParam'
+        ));
+    }
+
+    public function testCliInstall()
+    {
+        $pop = new \Pop\Pop();
+        ob_start();
+        $pop->cli(array(
+            '/home/nick/Projects/Popcorn/script/pop.php',
+            '.tar.gz',
+            'install',
+            'Color'
+        ));
+        $output = ob_get_contents();
+        ob_end_clean();
+        $this->assertContains('Downloading', $output);
+        if (file_exists(__DIR__ . '/../../src/Pop/Color.tar.gz')) {
+            unlink(__DIR__ . '/../../src/Pop/Color.tar.gz');
+        }
+    }
+
+    public function testCliRemove()
+    {
+        $pop = new \Pop\Pop();
+        ob_start();
+        $pop->cli(array(
+            '/home/nick/Projects/Popcorn/script/pop.php',
+            '.tar.gz',
+            'remove',
+            'Color'
+        ));
+        $output = ob_get_contents();
+        ob_end_clean();
+        $this->assertContains('Skipping', $output);
+    }
+
 }
 

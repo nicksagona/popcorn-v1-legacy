@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 
-require_once '../vendor/Popcorn/src/Pop/Pop.php';
+require_once __DIR__ . '/../vendor/Popcorn/src/Pop/Pop.php';
 
 try {
     $pop = new Pop\Pop();
