@@ -1,6 +1,11 @@
 Popcorn Micro-Framework v1.0.0
 ==============================
 
+RELEASE INFORMATION
+-------------------
+Popcorn Micro-Framework 1.0.0 Release  
+Released January 2, 2013
+
 OVERVIEW
 --------
 A REST-based micro-framework built from the Pop PHP Framework.
