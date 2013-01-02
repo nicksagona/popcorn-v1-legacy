@@ -1,5 +1,5 @@
-Popcorn Micro-Framework v1.0
-============================
+Popcorn Micro-Framework v1.0.0
+==============================
 
 OVERVIEW
 --------
