@@ -1,5 +1,8 @@
 #!/usr/bin/php
 <?php
+/**
+ * Popcorn Micro-Framework PHP CLI script
+ */
 
 require_once __DIR__ . '/../vendor/Popcorn/src/Pop/Pop.php';
 

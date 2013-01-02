@@ -1,4 +1,7 @@
 @echo off
+REM
+REM Popcorn Micro-Framework Windows CLI script
+REM
 
 SET TAR=
 SET ZIP=

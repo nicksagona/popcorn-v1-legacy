@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Popcorn Micro-Framework BASH CLI script
+#
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd -P )"
 CYG_PATH="$( which cygpath )"
