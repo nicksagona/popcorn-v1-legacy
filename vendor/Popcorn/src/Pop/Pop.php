@@ -790,23 +790,26 @@ class Pop
                                 }
                             }
                         }
-                        foreach ($deps[$parameter] as $param) {
-                            if (!in_array($param, $comps)) {
-                                $comps[] = $param;
-                            }
-                            foreach ($deps as $key => $value) {
-                                if (($key != $parameter) && in_array($param, $value)) {
-                                    if (!in_array($param, $deps[$parameter]) || !in_array($key, $deps[$parameter])) {
-                                        if (isset($skip[$param])) {
-                                            $skip[$param][] = $key;
-                                        } else {
-                                            $skip[$param] = array($key);
+                        if (isset($deps[$parameter])) {
+                            foreach ($deps[$parameter] as $param) {
+                                if (!in_array($param, $comps)) {
+                                    $comps[] = $param;
+                                }
+                                foreach ($deps as $key => $value) {
+                                    if (($key != $parameter) && in_array($param, $value)) {
+                                        if (!in_array($param, $deps[$parameter]) || !in_array($key, $deps[$parameter])) {
+                                            if (isset($skip[$param])) {
+                                                $skip[$param][] = $key;
+                                            } else {
+                                                $skip[$param] = array($key);
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
                     }
+
                     sort($installed);
                     sort($comps);
 
