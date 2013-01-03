@@ -680,6 +680,7 @@ class Pop
                 case 'install':
                     echo PHP_EOL;
                     $comps = array();
+                    $deps = array();
 
                     // If 'all', then install all
                     if (strtolower($parameters[0]) == 'all') {
@@ -698,6 +699,19 @@ class Pop
                         }
                     }
 
+                    // Get dependencies
+                    foreach ($comps as $comp) {
+                        if (count($xml['components'][$comp]) > 0) {
+                            foreach ($xml['components'][$comp] as $com) {
+                                if (!in_array($com, $comps)) {
+                                    $deps[] = $com;
+                                }
+                            }
+                        }
+                    }
+
+                    $comps = array_merge($comps, $deps);
+
                     // Download the component files
                     foreach ($comps as $comp) {
                         echo 'Downloading ' . $comp;
@@ -711,6 +725,7 @@ class Pop
                 case 'remove':
                     echo PHP_EOL;
                     $comps = array();
+                    $deps = array();
                     $installed = array();
                     $skip = array();
                     $dir = new File\Dir(__DIR__);
@@ -728,51 +743,72 @@ class Pop
                         $comps = array_keys($xml['components']);
                     // Else, select which components and their dependencies to remove
                     } else {
-                        foreach ($parameters as $parameter) {
-                            // Collect which to skip based on dependencies
-                            foreach ($installed as $comp) {
-                                if ($comp != $parameter) {
-                                    if (in_array($parameter, $xml['components'][$comp])) {
-                                        if (!isset($skip[$parameter])) {
-                                            $skip[$parameter] = array($comp);
-                                        } else {
-                                            $skip[$parameter][] = $comp;
-                                        }
-                                    }
-                                }
-                                foreach ($installed as $com) {
-                                    if ($comp != $parameter) {
-                                        if (in_array($com, $xml['components'][$comp]) && in_array($com, $xml['components'][$parameter])) {
-                                            if (!isset($skip[$com])) {
-                                                $skip[$com] = array($comp);
-                                            } else {
-                                                $skip[$com][] = $comp;
-                                            }
-
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Collect which to remove
-                            $comps[] = $parameter;
+                        foreach ($installed as $parameter) {
+                            // Get dependencies of installed components
                             if (count($xml['components'][$parameter]) > 0) {
                                 foreach ($xml['components'][$parameter] as $param) {
-                                    if (!in_array($param, $comps)) {
-                                        $comps[] = $param;
+                                    if (in_array($param, $installed)) {
+                                        if (!isset($deps[$parameter])) {
+                                            $deps[$parameter] = array($param);
+                                        } else if (!in_array($param, $deps[$parameter])) {
+                                            $deps[$parameter][] = $param;
+                                        }
+                                    }
+                                    if (count($xml['components'][$param]) > 0) {
+                                        foreach ($xml['components'][$param] as $par) {
+                                            if (in_array($par, $installed)) {
+                                                if (!isset($deps[$parameter])) {
+                                                    $deps[$parameter] = array($par);
+                                                } else if (!in_array($par, $deps[$parameter])) {
+                                                    $deps[$parameter][] = $par;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                if (isset($deps[$parameter])) {
+                                    sort($deps[$parameter]);
+                                }
+                            } else {
+                                $deps[$parameter] = array();
+                            }
+                        }
+                    }
+
+                    // Sort through the components (and their dependencies)
+                    // that were flagged for removal
+                    foreach ($parameters as $parameter) {
+                        if (!in_array($parameter, $comps)) {
+                            $comps[] = $parameter;
+                        }
+                        foreach ($deps as $key => $value) {
+                            if (in_array($parameter, $value)) {
+                                if (isset($skip[$parameter])) {
+                                    $skip[$parameter][] = $key;
+                                } else {
+                                    $skip[$parameter] = array($key);
+                                }
+                            }
+                        }
+                        foreach ($deps[$parameter] as $param) {
+                            if (!in_array($param, $comps)) {
+                                $comps[] = $param;
+                            }
+                            foreach ($deps as $key => $value) {
+                                if (($key != $parameter) && in_array($param, $value)) {
+                                    if (!in_array($param, $deps[$parameter]) || !in_array($key, $deps[$parameter])) {
+                                        if (isset($skip[$param])) {
+                                            $skip[$param][] = $key;
+                                        } else {
+                                            $skip[$param] = array($key);
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-
                     sort($installed);
                     sort($comps);
-
-                    // If the same, then nullify any dependency "skip" flags
-                    if ($installed == $comps) {
-                        $skip = array();
-                    }
 
                     // Begin to remove the components
                     foreach ($comps as $comp) {
