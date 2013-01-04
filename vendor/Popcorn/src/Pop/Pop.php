@@ -671,7 +671,8 @@ class Pop
                     echo PHP_EOL . 'Available Components for Popcorn:';
                     echo PHP_EOL . '=================================' . PHP_EOL;
                     foreach ($xml['components'] as $comp => $value) {
-                        echo '  ' . $comp . PHP_EOL;
+                        $prefix = (file_exists(__DIR__ . DIRECTORY_SEPARATOR . $comp)) ? ' [i] ' : '     ';
+                        echo $prefix . $comp . PHP_EOL;
                     }
                     echo PHP_EOL;
                     break;
