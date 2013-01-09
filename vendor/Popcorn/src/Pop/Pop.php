@@ -534,11 +534,11 @@ class Pop
         // If the route is valid, call the assigned action
         if ($this->isValidRequest($uri) && (count($params) == count($route[$uri]['params']))) {
             $params = $this->getRequestParams($route[$uri]);
-            $this->result = call_user_func_array($route[$uri]['action'], $params);
+            $this->result = call_user_func_array($this->getCallable($route[$uri]['action']), $params);
         // Else, trigger the error action
         } else {
             if (null !== $this->routes['error']) {
-                $this->result = call_user_func_array($this->routes['error'], array());
+                $this->result = call_user_func_array($this->getCallable($this->routes['error']), array());
             } else {
                 throw new Exception('Error: No error action has been defined to handle errors.');
             }
@@ -934,6 +934,24 @@ class Pop
         $this->response->setCode($code);
 
         return ($code == 200);
+    }
+
+    /**
+     * Get and validate the callable action
+     *
+     * @param  mixed $callable
+     * @throws Exception
+     * @return mixed
+     */
+    protected function getCallable($callable)
+    {
+        if (is_string($callable) && (strpos($callable, '->') !== false)) {
+            $ary = explode('->', $callable);
+            $class = $ary[0];
+            $method = $ary[1];
+            $callable = array(new $class(), $method);
+        }
+        return $callable;
     }
 
     /**
