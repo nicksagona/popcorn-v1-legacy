@@ -951,6 +951,7 @@ class Pop
             $method = $ary[1];
             $callable = array(new $class(), $method);
         }
+
         return $callable;
     }
 

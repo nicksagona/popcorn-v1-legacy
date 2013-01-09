@@ -93,7 +93,7 @@ $pop = new Pop\Pop();
 
 $pop->setViewPath('./view');
 $pop->get('/', 'Foo::factory');
-$pop->get('/hello/:name*', array(new Foo(), 'bar'));
+$pop->get('/hello/:name*', 'Foo->bar');
 $pop->error(array(new Foo(), 'error'));
 
 $pop->run();

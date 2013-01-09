@@ -16,7 +16,6 @@
 
 namespace PopcornTest;
 
-
 // Require the library's autoloader.
 require_once __DIR__ . '/../../src/Pop/Pop.php';
 
