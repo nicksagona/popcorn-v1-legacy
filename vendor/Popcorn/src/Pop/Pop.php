@@ -849,22 +849,24 @@ class Pop
 
                     // Begin to remove the components
                     foreach ($comps as $comp) {
-                        // If require by other installed components
-                        if (array_key_exists($comp, $skip)) {
-                            echo 'Skipping ' . $comp . '. It is required by the following components: ' . implode(', ', $skip[$comp]) . '.';
-                        // If a default component
-                        } else if (in_array($comp, $this->defaults)) {
-                            echo 'Skipping ' . $comp . '. It is a default component.';
-                        // If component is not installed or does not exist
-                        } else if (!file_exists(__DIR__ . DIRECTORY_SEPARATOR . $comp)) {
-                            echo 'Skipping ' . $comp . '. ' . (array_key_exists($comp, $xml['components']) ? 'It is not installed.' : 'It does not exist');
-                        // Else, remove it
-                        } else {
-                            echo 'Removing ' . $comp;
-                            $dir = new File\Dir(__DIR__ . DIRECTORY_SEPARATOR . $comp);
-                            $dir->emptyDir(null, true);
+                        if ($comp != 'all') {
+                            // If require by other installed components
+                            if (array_key_exists($comp, $skip)) {
+                                echo 'Skipping ' . $comp . '. It is required by the following components: ' . implode(', ', $skip[$comp]) . '.';
+                            // If a default component
+                            } else if (in_array($comp, $this->defaults)) {
+                                echo 'Skipping ' . $comp . '. It is a default component.';
+                            // If component is not installed or does not exist
+                            } else if (!file_exists(__DIR__ . DIRECTORY_SEPARATOR . $comp)) {
+                                echo 'Skipping ' . $comp . '. ' . (array_key_exists($comp, $xml['components']) ? 'It is not installed.' : 'It does not exist');
+                            // Else, remove it
+                            } else {
+                                echo 'Removing ' . $comp;
+                                $dir = new File\Dir(__DIR__ . DIRECTORY_SEPARATOR . $comp);
+                                $dir->emptyDir(null, true);
+                            }
+                            echo PHP_EOL;
                         }
-                        echo PHP_EOL;
                     }
 
                     echo PHP_EOL . 'Complete!' . PHP_EOL;
