@@ -29,6 +29,7 @@
                 <directory>../src/Pop/File</directory>
                 <directory>../src/Pop/Http</directory>
                 <directory>../src/Pop/Mvc</directory>
+                <directory>../src/Pop/Service</directory>
                 <directory>../src/Pop/Web</directory>
                 <file>../src/Pop/Config.php</file>
             </exclude>

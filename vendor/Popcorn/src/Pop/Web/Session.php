@@ -1,22 +1,13 @@
 <?php
 /**
- * Pop PHP Framework
+ * Pop PHP Framework (http://www.popphp.org/)
  *
- * LICENSE
- *
- * This source file is subject to the new BSD license that is bundled
- * with this package in the file LICENSE.TXT.
- * It is also available through the world-wide-web at this URL:
- * http://www.popphp.org/LICENSE.TXT
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to info@popphp.org so we can send you a copy immediately.
- *
+ * @link       https://github.com/nicksagona/PopPHP
  * @category   Pop
  * @package    Pop_Web
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
+ * @license    http://www.popphp.org/license     New BSD License
  */
 
 /**
@@ -25,14 +16,14 @@
 namespace Pop\Web;
 
 /**
- * This is the Session class for the Web component.
+ * Session class
  *
  * @category   Pop
  * @package    Pop_Web
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
- * @version    1.1.2
+ * @license    http://www.popphp.org/license     New BSD License
+ * @version    1.2.0
  */
 class Session
 {
@@ -41,7 +32,7 @@ class Session
      * Instance of the session
      * @var object
      */
-    private static $instance;
+    private static $instance = null;
 
     /**
      * Session ID
@@ -53,7 +44,7 @@ class Session
      * Constructor
      *
      * Private method to instantiate the session object. As part of the
-     * Singelton Pattern, it can only be called internally by the object itself.
+     * singleton pattern, it can only be called internally by the object itself.
      *
      * @return \Pop\Web\Session
      */
@@ -68,13 +59,13 @@ class Session
 
     /**
      * Determine whether or not an instance of the session object exists already,
-     * and instantiate the object if it doesn't exist.
+     * and instantiate the object if it does not exist.
      *
      * @return \Pop\Web\Session
      */
     public static function getInstance()
     {
-        if (empty(self::$instance)) {
+        if (null === self::$instance) {
             self::$instance = new Session();
         }
 

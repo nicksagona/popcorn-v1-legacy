@@ -1,22 +1,13 @@
 <?php
 /**
- * Pop PHP Framework
+ * Pop PHP Framework (http://www.popphp.org/)
  *
- * LICENSE
- *
- * This source file is subject to the new BSD license that is bundled
- * with this package in the file LICENSE.TXT.
- * It is also available through the world-wide-web at this URL:
- * http://www.popphp.org/LICENSE.TXT
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to info@popphp.org so we can send you a copy immediately.
- *
+ * @link       https://github.com/nicksagona/PopPHP
  * @category   Pop
  * @package    Pop_Web
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
+ * @license    http://www.popphp.org/license     New BSD License
  */
 
 /**
@@ -25,29 +16,29 @@
 namespace Pop\Web;
 
 /**
- * This is the Mobile class for the Web component.
+ * Mobile class
  *
  * @category   Pop
  * @package    Pop_Web
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
- * @version    1.1.2
+ * @license    http://www.popphp.org/license     New BSD License
+ * @version    1.2.0
  */
 class Mobile
 {
 
     /**
-     * Constant to force standard display
+     * Constant to force desktop display
      * @var int
      */
-    const FORCE_STANDARD = 1;
+    const DESKTOP = 1;
 
     /**
      * Constant to force mobile display
      * @var int
      */
-    const FORCE_MOBILE = 2;
+    const MOBILE = 2;
 
     /**
      * User agent property
@@ -62,10 +53,10 @@ class Mobile
     protected $device = null;
 
     /**
-     * Standard website destination URL
+     * Desktop website destination URL
      * @var string
      */
-    protected $standard = null;
+    protected $desktop = null;
 
     /**
      * Mobile website destination URL
@@ -80,10 +71,46 @@ class Mobile
     protected $force = 0;
 
     /**
-     * Mobile detect
+     * Mobile detect flag
      * @var boolean
      */
     protected $isMobile = false;
+
+    /**
+     * Android flag
+     * @var boolean
+     */
+    protected $android = false;
+
+    /**
+     * Apple flag
+     * @var boolean
+     */
+    protected $apple = false;
+
+    /**
+     * Windows flag
+     * @var boolean
+     */
+    protected $windows = false;
+
+    /**
+     * Blackberry flag
+     * @var boolean
+     */
+    protected $blackberry = false;
+
+    /**
+     * Pre flag
+     * @var boolean
+     */
+    protected $pre = false;
+
+    /**
+     * Opera flag
+     * @var boolean
+     */
+    protected $opera = false;
 
     /**
      * Constructor
@@ -91,16 +118,16 @@ class Mobile
      * Instantiate the mobile session object.
      *
      * @param  string $mobile
-     * @param  string $full
+     * @param  string $desktop
      * @param  int    $force
      * @return \Pop\Web\Mobile
      */
-    public function __construct($mobile = null, $full = null, $force = 0)
+    public function __construct($mobile = null, $desktop = null, $force = 0)
     {
         // Set the user agent and object properties.
         $this->ua = $_SERVER['HTTP_USER_AGENT'];
         $this->mobile = $mobile;
-        $this->standard = $full;
+        $this->desktop = $desktop;
         $this->isMobile = $this->detect();
         $this->force = $force;
     }
@@ -128,6 +155,162 @@ class Mobile
     }
 
     /**
+     * Method to get user-agent
+     *
+     * @return string
+     */
+    public function getUa()
+    {
+        return $this->ua;
+    }
+
+    /**
+     * Method to get device name
+     *
+     * @return string
+     */
+    public function getDevice()
+    {
+        return $this->device;
+    }
+
+    /**
+     * Method to get desktop URL
+     *
+     * @return string
+     */
+    public function getDesktopUrl()
+    {
+        return $this->desktop;
+    }
+
+    /**
+     * Method to get mobile URL
+     *
+     * @return string
+     */
+    public function getMobileUrl()
+    {
+        return $this->mobile;
+    }
+
+    /**
+     * Method to get force flag
+     *
+     * @return int
+     */
+    public function getForce()
+    {
+        return $this->force;
+    }
+
+    /**
+     * Method to set desktop URL
+     *
+     * @param string $url
+     * @return \Pop\Web\Mobile
+     */
+    public function setDesktopUrl($url)
+    {
+        $this->desktop = $url;
+        return $this;
+    }
+
+    /**
+     * Method to set mobile URL
+     *
+     * @param string $url
+     * @return \Pop\Web\Mobile
+     */
+    public function setMobileUrl($url)
+    {
+        $this->mobile = $url;
+        return $this;
+    }
+
+    /**
+     * Method to set force flag
+     *
+     * @param int $force
+     * @return \Pop\Web\Mobile
+     */
+    public function setForce($force)
+    {
+        $this->force = (int)$force;
+        return $this;
+    }
+
+    /**
+     * Method to get is mobile flag
+     *
+     * @return boolean
+     */
+    public function isMobile()
+    {
+        return $this->isMobile;
+    }
+
+    /**
+     * Method to get Android flag
+     *
+     * @return boolean
+     */
+    public function isAndroid()
+    {
+        return $this->android;
+    }
+
+    /**
+     * Method to get Apple flag
+     *
+     * @return boolean
+     */
+    public function isApple()
+    {
+        return $this->apple;
+    }
+
+    /**
+     * Method to get Windows flag
+     *
+     * @return boolean
+     */
+    public function isWindows()
+    {
+        return $this->windows;
+    }
+
+    /**
+     * Method to get Blackberry flag
+     *
+     * @return boolean
+     */
+    public function isBlackberry()
+    {
+        return $this->blackberry;
+    }
+
+    /**
+     * Method to get Pre flag
+     *
+     * @return boolean
+     */
+    public function isPre()
+    {
+        return $this->pre;
+    }
+
+    /**
+     * Method to get Opera flag
+     *
+     * @return boolean
+     */
+    public function isOpera()
+    {
+        return $this->opera;
+    }
+
+    /**
      * Method to go to the mobile site.
      *
      * @throws Exception
@@ -143,18 +326,18 @@ class Mobile
     }
 
     /**
-     * Method to go to the standard site.
+     * Method to go to the desktop site.
      *
      * @throws Exception
      * @return void
      */
-    public function goToStandard()
+    public function goToDesktop()
     {
-        if (null === $this->standard) {
-            throw new Exception('The standard site is not set.');
+        if (null === $this->desktop) {
+            throw new Exception('The desktop site is not set.');
         }
         header("HTTP/1.1 302 Found");
-        header("Location: " . $this->standard);
+        header("Location: " . $this->desktop);
     }
 
     /**
@@ -181,78 +364,18 @@ class Mobile
                 if ($this->isMobile) {
                     $this->goToMobile();
                 } else {
-                    $this->goToStandard();
+                    $this->goToDesktop();
                 }
                 break;
 
             case 1:
-                $this->goToStandard();
+                $this->goToDesktop();
                 break;
 
             case 2:
                 $this->goToMobile();
                 break;
         }
-    }
-
-    /**
-     * Method to get user-agent
-     *
-     * @return string
-     */
-    public function getUa()
-    {
-        return $this->ua;
-    }
-
-    /**
-     * Method to get device name
-     *
-     * @return string
-     */
-    public function getDevice()
-    {
-        return $this->device;
-    }
-
-    /**
-     * Method to get standard URL
-     *
-     * @return string
-     */
-    public function getStandardUrl()
-    {
-        return $this->standard;
-    }
-
-    /**
-     * Method to get mobile URL
-     *
-     * @return string
-     */
-    public function getMobileUrl()
-    {
-        return $this->mobile;
-    }
-
-    /**
-     * Method to get force flag
-     *
-     * @return int
-     */
-    public function getForce()
-    {
-        return $this->force;
-    }
-
-    /**
-     * Method to get is mobile flag
-     *
-     * @return boolean
-     */
-    public function isMobile()
-    {
-        return $this->isMobile;
     }
 
     /**
@@ -268,28 +391,34 @@ class Mobile
         // Android devices
         if (stripos($this->ua, 'android') !== false) {
             $this->device = 'Android';
+            $this->android = true;
             $is = true;
         // Blackberry devices
         } else if (stripos($this->ua, 'blackberry') !== false) {
             $this->device = 'Blackberry';
+            $this->blackberry = true;
             $is = true;
         // Windows devices
         } else if ((stripos($this->ua, 'windows ce') !== false) || (stripos($this->ua, 'windows phone') !== false)) {
             $this->device = 'Windows';
+            $this->windows = true;
             $is = true;
         // Opera devices
         } else if (stripos($this->ua, 'opera mini') !== false) {
             $this->device = 'Opera';
+            $this->opera = true;
             $is = true;
         // Palm Pre devices
         } else if ((stripos($this->ua, 'pre') !== false) && (stripos($this->ua, 'presto') === false)) {
             $this->device = 'Pre';
+            $this->pre = true;
             $is = true;
         // Apple devices
         } else if (preg_match('/(ipod|iphone|ipad)/i', $this->ua, $matches) != 0) {
             $this->device = $matches[0];
+            $this->apple = true;
             $is = true;
-        // Nokia and other devices
+        // Other devices
         } else if (preg_match('/(nokia|symbian|palm|treo|hiptop|avantgo|plucker|xiino|blazer|elaine|teleca|up.browser|up.link|mmp|smartphone|midp|wap|vodafone|o2|pocket|kindle|mobile|pda|psp)/i', $this->ua, $matches) != 0) {
             $this->device = $matches[0];
             $is = true;

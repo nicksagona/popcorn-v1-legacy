@@ -1,22 +1,13 @@
 <?php
 /**
- * Pop PHP Framework
+ * Pop PHP Framework (http://www.popphp.org/)
  *
- * LICENSE
- *
- * This source file is subject to the new BSD license that is bundled
- * with this package in the file LICENSE.TXT.
- * It is also available through the world-wide-web at this URL:
- * http://www.popphp.org/LICENSE.TXT
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to info@popphp.org so we can send you a copy immediately.
- *
+ * @link       https://github.com/nicksagona/PopPHP
  * @category   Pop
  * @package    Pop_Web
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
+ * @license    http://www.popphp.org/license     New BSD License
  */
 
 /**
@@ -25,14 +16,14 @@
 namespace Pop\Web;
 
 /**
- * This is the Browser class for the Web component.
+ * Browser class
  *
  * @category   Pop
  * @package    Pop_Web
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
- * @version    1.1.2
+ * @license    http://www.popphp.org/license     New BSD License
+ * @version    1.2.0
  */
 class Browser
 {
@@ -78,6 +69,30 @@ class Browser
      * @var string
      */
     protected $version = null;
+
+    /**
+     * Mozilla flag
+     * @var boolean
+     */
+    protected $mozilla = false;
+
+    /**
+     * WebKit flag
+     * @var boolean
+     */
+    protected $webkit = false;
+
+    /**
+     * MSIE flag
+     * @var boolean
+     */
+    protected $msie = false;
+
+    /**
+     * Opera flag
+     * @var boolean
+     */
+    protected $opera = false;
 
     /**
      * Constructor
@@ -166,6 +181,46 @@ class Browser
     }
 
     /**
+     * Method to get Mozilla flag
+     *
+     * @return boolean
+     */
+    public function isMozilla()
+    {
+        return $this->mozilla;
+    }
+
+    /**
+     * Method to get WebKit flag
+     *
+     * @return boolean
+     */
+    public function isWebkit()
+    {
+        return $this->webkit;
+    }
+
+    /**
+     * Method to get MSIE flag
+     *
+     * @return boolean
+     */
+    public function isMsie()
+    {
+        return $this->msie;
+    }
+
+    /**
+     * Method to get Opera flag
+     *
+     * @return boolean
+     */
+    public function isOpera()
+    {
+        return $this->opera;
+    }
+
+    /**
      * Method to detect properties.
      *
      * @return void
@@ -232,31 +287,39 @@ class Browser
         // Determine browser and browser version.
         if (stripos($this->ua, 'Camino') !== false) {
             $this->name = 'Camino';
+            $this->webkit = true;
             $this->version = substr($this->ua, (stripos($this->ua, 'Camino/') + 7));
         } else if (stripos($this->ua, 'Chrome') !== false) {
             $this->name = 'Chrome';
+            $this->webkit = true;
             $this->version = substr($this->ua, (stripos($this->ua, 'Chrome/') + 7));
             $this->version = substr($this->version, 0, (stripos($this->version, ' ')));
         } else if (stripos($this->ua, 'Firefox') !== false) {
             $this->name = 'Firefox';
+            $this->mozilla = true;
             $this->version = substr($this->ua, (stripos($this->ua, 'Firefox/') + 8));
         } else if (stripos($this->ua, 'MSIE') !== false) {
             $this->name = 'MSIE';
+            $this->msie = true;
             $this->version = substr($this->ua, (stripos($this->ua, 'MSIE ') + 5));
             $this->version = substr($this->version, 0, stripos($this->version, ';'));
         } else if (stripos($this->ua, 'Konqueror') !== false) {
             $this->name = 'Konqueror';
+            $this->webkit = true;
             $this->version = substr($this->ua, (stripos($this->ua, 'Konqueror/') + 10));
             $this->version = substr($this->version, 0, stripos($this->version, ';'));
         } else if (stripos($this->ua, 'Navigator') !== false) {
             $this->name = 'Navigator';
+            $this->mozilla = true;
             $this->version = substr($this->ua, (stripos($this->ua, 'Navigator/') + 10));
         } else if (stripos($this->ua, 'Opera') !== false) {
             $this->name = 'Opera';
+            $this->opera = true;
             $this->version = substr($this->ua, (stripos($this->ua, 'Opera/') + 6));
             $this->version = substr($this->version, 0, stripos($this->version, ' '));
         } else if (stripos($this->ua, 'Safari') !== false) {
             $this->name = 'Safari';
+            $this->webkit = true;
             $this->version = substr($this->ua, (stripos($this->ua, 'Version/') + 8));
             $this->version = substr($this->version, 0, stripos($this->version, ' '));
         }

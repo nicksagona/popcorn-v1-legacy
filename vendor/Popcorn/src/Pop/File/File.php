@@ -1,22 +1,13 @@
 <?php
 /**
- * Pop PHP Framework
+ * Pop PHP Framework (http://www.popphp.org/)
  *
- * LICENSE
- *
- * This source file is subject to the new BSD license that is bundled
- * with this package in the file LICENSE.TXT.
- * It is also available through the world-wide-web at this URL:
- * http://www.popphp.org/LICENSE.TXT
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to info@popphp.org so we can send you a copy immediately.
- *
+ * @link       https://github.com/nicksagona/PopPHP
  * @category   Pop
  * @package    Pop_File
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
+ * @license    http://www.popphp.org/license     New BSD License
  */
 
 /**
@@ -24,17 +15,15 @@
  */
 namespace Pop\File;
 
-use Pop\Http\Response;
-
 /**
- * This is the File class for the File component.
+ * File class
  *
  * @category   Pop
  * @package    Pop_File
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
- * @version    1.1.2
+ * @license    http://www.popphp.org/license     New BSD License
+ * @version    1.2.0
  */
 class File
 {
@@ -87,12 +76,6 @@ class File
     protected $output = null;
 
     /**
-     * Directory and file permissions, based on chmod, when and if applicable.
-     * @var array
-     */
-    protected $perm = array();
-
-    /**
      * Array of allowed file types.
      * @var array
      */
@@ -121,6 +104,7 @@ class File
         'js'     => 'text/plain',
         'json'   => 'text/plain',
         'log'    => 'text/plain',
+        'md'     => 'text/plain',
         'mov'    => 'video/quicktime',
         'mp2'    => 'audio/mpeg',
         'mp3'    => 'audio/mpeg',
@@ -203,13 +187,12 @@ class File
         }
 
         // Check to see if the permissions are set correctly.
-        if ((self::checkPermissions(dirname($file))) != 777) {
-            throw new Exception('Error: Permission denied.');
+        if (!is_writable(dirname($file))) {
+            throw new Exception('Error: Permission denied. The upload directory is not writable.');
         }
 
         // Move the uploaded file, creating a file object with it.
         if (move_uploaded_file($upload, $file)) {
-            chmod($file, 0777);
             $fileSize = filesize($file);
 
             // Check the file size requirement.
@@ -263,7 +246,7 @@ class File
      */
     public function isAllowed($type)
     {
-        return (array_key_exists(strtolower($type), $this->allowed)) ? true : false;
+        return (array_key_exists(strtolower($type), $this->allowed));
     }
 
     /**
@@ -389,36 +372,140 @@ class File
     }
 
     /**
-     * Get the permissions of the file.
-     *
-     * @param  boolean $dir
-     * @return int|boolean
-     */
-    public function getMode($dir = false)
-    {
-        return ($dir) ? $this->perm['dir'] : $this->perm['file'];
-    }
-
-    /**
      * Change the permissions of the file.
      *
      * @param  mixed    $mode
-     * @param  boolean  $dir
-     * @return void
+     * @return \Pop\File\File
      */
-    public function setMode($mode, $dir = false)
+    public function setPermissions($mode)
     {
-        if ($dir) {
-            if (file_exists($this->dir)) {
-                chmod($this->dir, $mode);
-                $this->setFile($this->fullpath);
-            }
-        } else {
+        if (file_exists($this->fullpath)) {
+            chmod($this->fullpath, $mode);
+            clearstatcache();
+        }
+        return $this;
+    }
+
+    /**
+     * Change the permissions of the directory the file is in.
+     *
+     * @param  mixed    $mode
+     * @return \Pop\File\File
+     */
+    public function setDirPermissions($mode)
+    {
+        if (file_exists($this->dir)) {
+            chmod($this->dir, $mode);
+            clearstatcache();
+        }
+        return $this;
+    }
+
+    /**
+     * Get the permissions of the file.
+     *
+     * @return string
+     */
+    public function getPermissions()
+    {
+        return (DIRECTORY_SEPARATOR == '/') ?
+            substr(sprintf('%o', fileperms($this->fullpath)), -3) :
+            null;
+    }
+
+    /**
+     * Get the permissions of the directory the file is in.
+     *
+     * @return string
+     */
+    public function getDirPermissions()
+    {
+        return (DIRECTORY_SEPARATOR == '/') ?
+            substr(sprintf('%o', fileperms($this->dir)), -3) :
+            null;
+    }
+
+    /**
+     * Get the owner of the file. Works on POSIX file systems only
+     *
+     * @return array
+     */
+    public function getOwner()
+    {
+        $owner = array();
+        if (DIRECTORY_SEPARATOR == '/') {
+            $owner = (file_exists($this->fullpath)) ?
+                posix_getpwuid(fileowner($this->fullpath)) :
+                $this->getUser();
+        }
+
+        return $owner;
+    }
+
+    /**
+     * Get the owner of the file. Works on POSIX file systems only
+     *
+     * @return array
+     */
+    public function getDirOwner()
+    {
+        $owner = array();
+        if (DIRECTORY_SEPARATOR == '/') {
+            $owner = (file_exists($this->dir)) ?
+                posix_getpwuid(fileowner($this->dir)) :
+                $this->getUser();
+        }
+
+        return $owner;
+    }
+
+    /**
+     * Get the owner of the file. Works on POSIX file systems only
+     *
+     * @return array
+     */
+    public function getGroup()
+    {
+        $group = array();
+        if (DIRECTORY_SEPARATOR == '/') {
             if (file_exists($this->fullpath)) {
-                chmod($this->fullpath, $mode);
-                $this->setFile($this->fullpath);
+                $group = posix_getgrgid(filegroup($this->fullpath));
             }
         }
+
+        return $group;
+    }
+
+    /**
+     * Get the owner of the file. Works on POSIX file systems only
+     *
+     * @return array
+     */
+    public function getDirGroup()
+    {
+        $group = array();
+        if (DIRECTORY_SEPARATOR == '/') {
+            if (file_exists($this->dir)) {
+                $group = posix_getgrgid(filegroup($this->dir));
+            }
+        }
+
+        return $group;
+    }
+
+    /**
+     * Get current user. Works on POSIX file systems only
+     *
+     * @return array
+     */
+    public function getUser()
+    {
+        $me = array();
+        if (DIRECTORY_SEPARATOR == '/') {
+            $me = posix_getpwuid(posix_geteuid());
+        }
+
+        return $me;
     }
 
     /**
@@ -442,7 +529,9 @@ class File
         // Else, if the file exists, then read the data from the actual file
         } else if (file_exists($this->fullpath)) {
             if (null !== $off) {
-                $data = (null !== $len) ? file_get_contents($this->fullpath, null, null, $off, $len) : $this->output = file_get_contents($this->fullpath, null, null, $off);
+                $data = (null !== $len) ?
+                    file_get_contents($this->fullpath, null, null, $off, $len) :
+                    $this->output = file_get_contents($this->fullpath, null, null, $off);
             } else {
                 $data = file_get_contents($this->fullpath);
             }
@@ -494,11 +583,9 @@ class File
      */
     public function copy($new)
     {
-        // Check to see if the new file already exists, and if the permissions are set correctly.
+        // Check to see if the new file already exists.
         if (file_exists($new)) {
             throw new Exception('Error: The file already exists.');
-        } else if ((self::checkPermissions(dirname($new))) != 777) {
-            throw new Exception('Error: Permission denied.');
         }
 
         if (file_exists($this->fullpath)) {
@@ -506,7 +593,6 @@ class File
         } else {
             file_put_contents($new, $this->output);
         }
-        chmod($new, 0777);
         $this->setFile($new);
 
         return $this;
@@ -521,11 +607,9 @@ class File
      */
     public function move($new)
     {
-        // Check to see if the new file already exists, and if the permissions are set correctly.
+        // Check to see if the new file already exists.
         if (file_exists($new)) {
             throw new Exception('Error: The file already exists.');
-        } else if ((self::checkPermissions(dirname($new)) != 777) || ($this->perm['dir'] != 777)) {
-            throw new Exception('Error: Permission denied.');
         }
 
         if (file_exists($this->fullpath)) {
@@ -533,7 +617,6 @@ class File
         } else {
             file_put_contents($new, $this->output);
         }
-        chmod($new, 0777);
         $this->setFile($new);
 
         return $this;
@@ -554,7 +637,7 @@ class File
             'Content-disposition' => $attach . 'filename=' . $this->basename
         );
 
-        $response = new Response(200, $headers, $this->read());
+        $response = new \Pop\Http\Response(200, $headers, $this->read());
 
         if (isset($_SERVER['SERVER_PORT']) && ($_SERVER['SERVER_PORT'] == 443)) {
             $response->setSslHeaders();
@@ -594,12 +677,8 @@ class File
      */
     public function delete()
     {
-        // Check to make sure the file exists and the permissions are set correctly before attempting to delete it from disk.
+        // Check to make sure the file exists.
         if (file_exists($this->fullpath)) {
-            if ((null !== $this->perm['file']) && ($this->perm['file'] != 777)) {
-                throw new Exception('Error: Permission denied.');
-            }
-
             unlink($this->fullpath);
 
             // Reset file object properties.
@@ -609,24 +688,6 @@ class File
                 $this->{$key} = null;
             }
         }
-    }
-
-    /**
-     * Check file or directory permissions.
-     *
-     * @param  string $file
-     * @throws Exception
-     * @return string
-     */
-    protected static function checkPermissions($file)
-    {
-        if (DIRECTORY_SEPARATOR == '/') {
-            $perm = substr(sprintf('%o', fileperms($file)), -3);
-        } else {
-            $perm = (is_writable($file)) ? 777 : 644;
-        }
-
-        return $perm;
     }
 
     /**
@@ -651,18 +712,9 @@ class File
         $this->basename = $file_parts['basename'];
         $this->filename = $file_parts['filename'];
         $this->ext = (isset($file_parts['extension'])) ? $file_parts['extension'] : null;
-        $this->perm['dir'] = self::checkPermissions($this->dir);
 
         // Check if the file exists, and set the size and permissions accordingly.
-        if (file_exists($file)) {
-            // Check if the server is a Linux/Unix server or a Windows server.
-            $this->perm['file'] = self::checkPermissions($this->fullpath);
-            $this->size = filesize($file);
-        } else {
-            // Check if the server is a Linux/Unix server or a Windows server.
-            $this->perm['file'] = 777;
-            $this->size = 0;
-        }
+        $this->size = (file_exists($file)) ? filesize($file) : 0;
 
         // Check to see if the file is an accepted file format.
         if ((null !== $this->allowed) && (null !== $this->ext) && (count($this->allowed) > 0) && (!array_key_exists(strtolower($this->ext), $this->allowed))) {

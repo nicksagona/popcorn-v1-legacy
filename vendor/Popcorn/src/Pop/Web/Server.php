@@ -1,22 +1,13 @@
 <?php
 /**
- * Pop PHP Framework
+ * Pop PHP Framework (http://www.popphp.org/)
  *
- * LICENSE
- *
- * This source file is subject to the new BSD license that is bundled
- * with this package in the file LICENSE.TXT.
- * It is also available through the world-wide-web at this URL:
- * http://www.popphp.org/LICENSE.TXT
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to info@popphp.org so we can send you a copy immediately.
- *
+ * @link       https://github.com/nicksagona/PopPHP
  * @category   Pop
  * @package    Pop_Web
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
+ * @license    http://www.popphp.org/license     New BSD License
  */
 
 /**
@@ -25,14 +16,14 @@
 namespace Pop\Web;
 
 /**
- * This is the Server class for the Web component.
+ * Server class
  *
  * @category   Pop
  * @package    Pop_Web
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
- * @version    1.1.2
+ * @license    http://www.popphp.org/license     New BSD License
+ * @version    1.2.0
  */
 class Server
 {
@@ -72,6 +63,30 @@ class Server
      * @var string
      */
     protected $php = null;
+
+    /**
+     * Linux flag
+     * @var boolean
+     */
+    protected $linux = false;
+
+    /**
+     * Unix flag
+     * @var boolean
+     */
+    protected $unix = false;
+
+    /**
+     * Windows flag
+     * @var boolean
+     */
+    protected $windows = false;
+
+    /**
+     * Mac flag
+     * @var boolean
+     */
+    protected $mac = false;
 
     /**
      * Constructor
@@ -148,6 +163,46 @@ class Server
     }
 
     /**
+     * Method to get Linux flag
+     *
+     * @return boolean
+     */
+    public function isLinux()
+    {
+        return $this->linux;
+    }
+
+    /**
+     * Method to get Unix flag
+     *
+     * @return boolean
+     */
+    public function isUnix()
+    {
+        return $this->unix;
+    }
+
+    /**
+     * Method to get Windows flag
+     *
+     * @return boolean
+     */
+    public function isWindows()
+    {
+        return $this->windows;
+    }
+
+    /**
+     * Method to get Mac flag
+     *
+     * @return boolean
+     */
+    public function isMac()
+    {
+        return $this->mac;
+    }
+
+    /**
      * Method to detect properties.
      *
      * @return void
@@ -159,15 +214,19 @@ class Server
         // Set the server OS and distro, if applicable.
         if (preg_match('/(debian|ubuntu|kbuntu|red hat|centos|fedora|suse|knoppix|gentoo|linux)/i', $this->software, $matches) != 0) {
             $this->os = 'Linux';
+            $this->linux = true;
             $this->distro = $matches[0];
         } else if (preg_match('/(bsd|sun|solaris|unix)/i', $this->software, $matches) != 0) {
             $this->os = 'Unix';
+            $this->unix = true;
             $this->distro = $matches[0];
         } else if (preg_match('/(win|microsoft)/i', $this->software, $matches) != 0) {
             $this->os = 'Windows';
+            $this->windows = true;
             $this->distro = 'Microsoft';
         } else if (stripos($this->software, 'mac') !== false) {
             $this->os = 'Mac';
+            $this->mac = true;
             $this->distro = 'Darwin';
         } else {
             // If unsuccessful, attempt based on path separator.

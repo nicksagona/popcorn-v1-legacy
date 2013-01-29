@@ -1,22 +1,13 @@
 <?php
 /**
- * Pop PHP Framework
+ * Pop PHP Framework (http://www.popphp.org/)
  *
- * LICENSE
- *
- * This source file is subject to the new BSD license that is bundled
- * with this package in the file LICENSE.TXT.
- * It is also available through the world-wide-web at this URL:
- * http://www.popphp.org/LICENSE.TXT
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to info@popphp.org so we can send you a copy immediately.
- *
+ * @link       https://github.com/nicksagona/PopPHP
  * @category   Pop
  * @package    Pop_File
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
+ * @license    http://www.popphp.org/license     New BSD License
  */
 
 /**
@@ -25,14 +16,14 @@
 namespace Pop\File;
 
 /**
- * This is the Dir class for the File component.
+ * File directory class
  *
  * @category   Pop
  * @package    Pop_File
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
- * @version    1.1.2
+ * @license    http://www.popphp.org/license     New BSD License
+ * @version    1.2.0
  */
 class Dir
 {
@@ -171,7 +162,6 @@ class Dir
         return realpath($sysTemp);
     }
 
-
     /**
      * Static method to return the upload temp directory.
      *
@@ -205,25 +195,82 @@ class Dir
     /**
      * Get the permissions of the directory.
      *
-     * @return int
+     * @return string
      */
-    public function getMode()
+    public function getPermissions()
     {
-        return substr(sprintf('%o', fileperms($this->path)), -3);
+        return (DIRECTORY_SEPARATOR == '/') ?
+            substr(sprintf('%o', fileperms($this->path)), -3) :
+            null;
     }
 
     /**
      * Change the permissions of the directory.
      *
      * @param  int $mode
-     * @return void
+     * @return \Pop\File\Dir
      */
-    public function setMode($mode)
+    public function setPermissions($mode)
     {
         if (file_exists($this->path)) {
+            if (is_numeric($mode) && (strlen($mode) == 3)) {
+                $mode = '0' . $mode;
+            }
             chmod($this->path, $mode);
+            clearstatcache();
             self::__construct($this->path, $this->full, $this->rec);
         }
+
+        return $this;
+    }
+
+    /**
+     * Get the owner of the file. Works on POSIX file systems only
+     *
+     * @return array
+     */
+    public function getOwner()
+    {
+        $owner = array();
+        if (DIRECTORY_SEPARATOR == '/') {
+            if (file_exists($this->path)) {
+                $owner = posix_getpwuid(fileowner($this->path));
+            }
+        }
+
+        return $owner;
+    }
+
+    /**
+     * Get the owner of the file. Works on POSIX file systems only
+     *
+     * @return array
+     */
+    public function getGroup()
+    {
+        $group = array();
+        if (DIRECTORY_SEPARATOR == '/') {
+            if (file_exists($this->path)) {
+                $group = posix_getgrgid(filegroup($this->path));
+            }
+        }
+
+        return $group;
+    }
+
+    /**
+     * Get current user. Works on POSIX file systems only
+     *
+     * @return array
+     */
+    public function getUser()
+    {
+        $me = array();
+        if (DIRECTORY_SEPARATOR == '/') {
+            $me = posix_getpwuid(posix_geteuid());
+        }
+
+        return $me;
     }
 
     /**

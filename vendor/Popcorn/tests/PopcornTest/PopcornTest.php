@@ -84,6 +84,14 @@ class PopcornTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(0, count($pop->getEventManager()->get('route.pre')));
     }
 
+    public function testService()
+    {
+        $pop = new \Pop\Pop();
+        $pop->setService('config', 'Pop\Config', array(array('test' => 123)));
+        $this->assertInstanceOf('Pop\Config', $pop->getService('config'));
+        $this->assertInstanceOf('Pop\Service\Locator', $pop->getServiceLocator());
+    }
+
     public function testGetRoute()
     {
         $pop = new \Pop\Pop();

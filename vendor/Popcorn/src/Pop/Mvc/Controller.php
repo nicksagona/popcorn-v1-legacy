@@ -1,22 +1,13 @@
 <?php
 /**
- * Pop PHP Framework
+ * Pop PHP Framework (http://www.popphp.org/)
  *
- * LICENSE
- *
- * This source file is subject to the new BSD license that is bundled
- * with this package in the file LICENSE.TXT.
- * It is also available through the world-wide-web at this URL:
- * http://www.popphp.org/LICENSE.TXT
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to info@popphp.org so we can send you a copy immediately.
- *
+ * @link       https://github.com/nicksagona/PopPHP
  * @category   Pop
  * @package    Pop_Mvc
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
+ * @license    http://www.popphp.org/license     New BSD License
  */
 
 /**
@@ -29,14 +20,14 @@ use Pop\Http\Response,
     Pop\Project\Project;
 
 /**
- * This is the Controller class for the Mvc component.
+ * Mvc controller class
  *
  * @category   Pop
  * @package    Pop_Mvc
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
- * @version    1.1.2
+ * @license    http://www.popphp.org/license     New BSD License
+ * @version    1.2.0
  */
 class Controller
 {
@@ -82,10 +73,10 @@ class Controller
      *
      * Instantiate the controller object
      *
-     * @param Request  $request
-     * @param Response $response
-     * @param Project  $project
-     * @param string   $viewPath
+     * @param \Pop\Http\Request    $request
+     * @param \Pop\Http\Response   $response
+     * @param \Pop\Project\Project $project
+     * @param string               $viewPath
      * @return \Pop\Mvc\Controller
      */
     public function __construct(Request $request = null, Response $response = null, Project $project = null, $viewPath = null)
@@ -105,7 +96,7 @@ class Controller
     /**
      * Set the request object
      *
-     * @param  Request $request
+     * @param  \Pop\Http\Request $request
      * @return \Pop\Mvc\Controller
      */
     public function setRequest(Request $request)
@@ -117,7 +108,7 @@ class Controller
     /**
      * Set the response object
      *
-     * @param  Response $response
+     * @param  \Pop\Http\Response $response
      * @return \Pop\Mvc\Controller
      */
     public function setResponse(Response $response)
@@ -129,7 +120,7 @@ class Controller
     /**
      * Set the response object
      *
-     * @param  Project $project
+     * @param  \Pop\Project\Project $project
      * @return \Pop\Mvc\Controller
      */
     public function setProject(Project $project)

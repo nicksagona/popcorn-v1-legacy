@@ -1,22 +1,13 @@
 <?php
 /**
- * Pop PHP Framework
+ * Pop PHP Framework (http://www.popphp.org/)
  *
- * LICENSE
- *
- * This source file is subject to the new BSD license that is bundled
- * with this package in the file LICENSE.TXT.
- * It is also available through the world-wide-web at this URL:
- * http://www.popphp.org/LICENSE.TXT
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to info@popphp.org so we can send you a copy immediately.
- *
+ * @link       https://github.com/nicksagona/PopPHP
  * @category   Pop
  * @package    Pop_Http
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
+ * @license    http://www.popphp.org/license     New BSD License
  */
 
 /**
@@ -25,14 +16,14 @@
 namespace Pop\Http;
 
 /**
- * This is the Request class for the Http component.
+ * HTTP request class
  *
  * @category   Pop
  * @package    Pop_Http
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
- * @version    1.1.2
+ * @license    http://www.popphp.org/license     New BSD License
+ * @version    1.2.0
  */
 class Request
 {
@@ -134,6 +125,12 @@ class Request
     protected $env = array();
 
     /**
+     * Headers
+     * @var array
+     */
+    protected $headers = array();
+
+    /**
      * Constructor
      *
      * Instantiate the request object.
@@ -155,6 +152,25 @@ class Request
         if (isset($_SERVER['REQUEST_METHOD'])) {
             if ($this->isPut() || $this->isPatch() || $this->isDelete()) {
                 $this->parseData();
+            }
+        }
+
+        // Get any possible request headers
+        if (function_exists('getallheaders')) {
+            $this->headers = getallheaders();
+        } else {
+            foreach ($_SERVER as $key => $value) {
+                if (substr($key, 0, 5) == 'HTTP_') {
+                    $key = ucfirst(strtolower(str_replace('HTTP_', '', $key)));
+                    if (strpos($key, '_') !== false) {
+                        $ary = explode('_', $key);
+                        foreach ($ary as $k => $v){
+                            $ary[$k] = ucfirst(strtolower($v));
+                        }
+                        $key = implode('-', $ary);
+                    }
+                    $this->headers[$key] = $value;
+                }
             }
         }
     }
@@ -524,6 +540,27 @@ class Request
         } else {
             return (isset($this->env[$key])) ? $this->env[$key] : null;
         }
+    }
+
+    /**
+     * Get a value from the request headers
+     *
+     * @param  string $key
+     * @return string
+     */
+    public function getHeader($key)
+    {
+        return (isset($this->headers[$key])) ? $this->headers[$key] : null;
+    }
+
+    /**
+     * Get the request headers
+     *
+     * @return array
+     */
+    public function getHeaders()
+    {
+        return $this->headers;
     }
 
     /**

@@ -1,22 +1,13 @@
 <?php
 /**
- * Pop PHP Framework
+ * Pop PHP Framework (http://www.popphp.org/)
  *
- * LICENSE
- *
- * This source file is subject to the new BSD license that is bundled
- * with this package in the file LICENSE.TXT.
- * It is also available through the world-wide-web at this URL:
- * http://www.popphp.org/LICENSE.TXT
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to info@popphp.org so we can send you a copy immediately.
- *
+ * @link       https://github.com/nicksagona/PopPHP
  * @category   Pop
  * @package    Pop_Mvc
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
+ * @license    http://www.popphp.org/license     New BSD License
  */
 
 /**
@@ -24,18 +15,15 @@
  */
 namespace Pop\Mvc;
 
-use Pop\Http\Request,
-    Pop\Project\Project;
-
 /**
- * This is the Router class for the Mvc component.
+ * Mvc router class
  *
  * @category   Pop
  * @package    Pop_Mvc
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
- * @version    1.1.2
+ * @license    http://www.popphp.org/license     New BSD License
+ * @version    1.2.0
  */
 class Router
 {
@@ -79,9 +67,9 @@ class Router
      * @param  \Pop\Http\Request $request
      * @return \Pop\Mvc\Router
      */
-    public function __construct(array $controllers, $request = null)
+    public function __construct(array $controllers, \Pop\Http\Request $request = null)
     {
-        $this->request = (null !== $request) ? $request : new Request();
+        $this->request = (null !== $request) ? $request : new \Pop\Http\Request();
         $this->controllers = $controllers;
     }
 
@@ -92,7 +80,7 @@ class Router
      * @param  \Pop\Http\Request $request
      * @return \Pop\Mvc\Router
      */
-    public static function factory(array $controllers, $request = null)
+    public static function factory(array $controllers, \Pop\Http\Request $request = null)
     {
         return new self($controllers, $request);
     }
@@ -189,10 +177,10 @@ class Router
     /**
      * Route to the controller
      *
-     * @param  Project $project
+     * @param  \Pop\Project\Project $project
      * @return void
      */
-    public function route(Project $project = null)
+    public function route(\Pop\Project\Project $project = null)
     {
         $this->project = $project;
 

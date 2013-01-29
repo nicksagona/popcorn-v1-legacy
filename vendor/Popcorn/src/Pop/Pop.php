@@ -1,17 +1,8 @@
 <?php
 /**
- * Popcorn Micro-Framework
+ * Popcorn Micro-Framework (http://popcorn.popphp.org/)
  *
- * LICENSE
- *
- * This source file is subject to the new BSD license that is bundled
- * with this package in the file LICENSE.TXT.
- * It is also available through the world-wide-web at this URL:
- * https://raw.github.com/nicksagona/Popcorn/master/LICENSE.TXT
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to info@popphp.org so we can send you a copy immediately.
- *
+ * @link       https://github.com/nicksagona/Popcorn
  * @category   Pop
  * @package    Pop
  * @author     Nick Sagona, III <nick@popphp.org>
@@ -32,7 +23,7 @@ namespace Pop;
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
  * @license    https://raw.github.com/nicksagona/Popcorn/master/LICENSE.TXT     New BSD License
- * @version    1.0.0
+ * @version    1.0.1
  */
 class Pop
 {
@@ -40,7 +31,7 @@ class Pop
     /**
      * Current version
      */
-    const VERSION = '1.0.0';
+    const VERSION = '1.0.1';
 
     /**
      * Array of available namespaces prefixes.
@@ -99,6 +90,12 @@ class Pop
     protected $events = null;
 
     /**
+     * Project services
+     * @var \Pop\Service\Locator
+     */
+    protected $services = null;
+
+    /**
      * Result
      * @var mixed
      */
@@ -131,6 +128,7 @@ class Pop
         'File',
         'Http',
         'Mvc',
+        'Service',
         'Web'
     );
 
@@ -153,6 +151,7 @@ class Pop
         $this->request = new \Pop\Http\Request();
         $this->response = new \Pop\Http\Response();
         $this->events = new \Pop\Event\Manager();
+        $this->services = new \Pop\Service\Locator();
         $this->config = new \Pop\Config($config, $changes);
     }
 
@@ -434,7 +433,6 @@ class Pop
         return $this;
     }
 
-
     /**
      * Get the event Manager
      *
@@ -443,6 +441,41 @@ class Pop
     public function getEventManager()
     {
         return $this->events;
+    }
+
+    /**
+     * Set a service
+     *
+     * @param  string $name
+     * @param  mixed  $call
+     * @param  mixed  $params
+     * @return \Pop\Pop
+     */
+    public function setService($name, $call, $params = null)
+    {
+        $this->services->set($name, $call, $params);
+        return $this;
+    }
+
+    /**
+     * Get a service
+     *
+     * @param  string $name
+     * @return mixed
+     */
+    public function getService($name)
+    {
+        return $this->services->get($name);
+    }
+
+    /**
+     * Get the service Locator
+     *
+     * @return \Pop\Service\Locator
+     */
+    public function getServiceLocator()
+    {
+        return $this->services;
     }
 
     /**

@@ -1,22 +1,13 @@
 <?php
 /**
- * Pop PHP Framework
+ * Pop PHP Framework (http://www.popphp.org/)
  *
- * LICENSE
- *
- * This source file is subject to the new BSD license that is bundled
- * with this package in the file LICENSE.TXT.
- * It is also available through the world-wide-web at this URL:
- * http://www.popphp.org/LICENSE.TXT
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to info@popphp.org so we can send you a copy immediately.
- *
+ * @link       https://github.com/nicksagona/PopPHP
  * @category   Pop
  * @package    Pop_Event
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
+ * @license    http://www.popphp.org/license     New BSD License
  */
 
 /**
@@ -25,14 +16,14 @@
 namespace Pop\Event;
 
 /**
- * This is the Manager class for the Event component.
+ * Event manager class
  *
  * @category   Pop
  * @package    Pop_Event
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
- * @license    http://www.popphp.org/LICENSE.TXT     New BSD License
- * @version    1.1.2
+ * @license    http://www.popphp.org/license     New BSD License
+ * @version    1.2.0
  */
 class Manager
 {
@@ -178,9 +169,30 @@ class Manager
                         $params[] = $refParameter->getName();
                     }
                 // Else, if the action is a callable class/method combination
-                } else if (is_callable($action, false, $callable_name)) {
-                    $cls = substr($callable_name, 0, strpos($callable_name, ':'));
-                    $mthd = substr($callable_name, (strrpos($callable_name, ':') + 1));
+                } else if (is_string($action) || is_callable($action, false, $callable_name)) {
+                    // If the callable action is a string, parse the class/method from it
+                    if (is_string($action)) {
+                        // If a static call
+                        if (strpos($action, '::')) {
+                            $ary = explode('::', $action);
+                            $cls = $ary[0];
+                            $mthd = $ary[1];
+                        // If an instance call
+                        } else if (strpos($action, '->')) {
+                            $ary = explode('->', $action);
+                            $cls = $ary[0];
+                            $mthd = $ary[1];
+                            $action = array(new $cls, $mthd);
+                        // Else, if a new/construct call
+                        } else {
+                            $action = str_replace('new ', null, $action);
+                            $cls = $action;
+                            $mthd = '__construct';
+                        }
+                    } else {
+                        $cls = substr($callable_name, 0, strpos($callable_name, ':'));
+                        $mthd = substr($callable_name, (strrpos($callable_name, ':') + 1));
+                    }
 
                     $methodExport = \ReflectionMethod::export($cls, $mthd, true);
                     // Get the method parameters
@@ -204,7 +216,14 @@ class Manager
                     $realArgs[$value] = $args[$value];
                 }
 
-                $this->results[$name][] = call_user_func_array($action, $realArgs);
+                // If the method is the constructor, create object
+                if (isset($mthd) && ($mthd == '__construct')) {
+                    $reflect  = new \ReflectionClass($action);
+                    $this->results[$name][] = $reflect->newInstanceArgs($realArgs);
+                // Else, just call it
+                } else {
+                    $this->results[$name][] = call_user_func_array($action, $realArgs);
+                }
             }
         }
     }
