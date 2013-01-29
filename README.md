@@ -1,10 +1,10 @@
-Popcorn Micro-Framework v1.0.0
+Popcorn Micro-Framework v1.0.1
 ==============================
 
 RELEASE INFORMATION
 -------------------
-Popcorn Micro-Framework 1.0.0 Release  
-Released January 2, 2013
+Popcorn Micro-Framework 1.0.1 Release
+Released January 29, 2013
 
 OVERVIEW
 --------
@@ -23,6 +23,7 @@ FEATURES
 * Support for standard HTTP methods
 * Wildcard support
 * Event handling
+* Service management
 * Basic web support, such as sessions, cookies, mobile detection, etc.
 * Support for custom view/template management and rendering
 * Autoloading and support for registering other libraries of code

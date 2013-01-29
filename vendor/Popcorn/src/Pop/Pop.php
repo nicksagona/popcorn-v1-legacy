@@ -679,8 +679,8 @@ class Pop
             switch ($command) {
                 // Show the version
                 case 'version':
-                    echo PHP_EOL . 'Popcorn v' . self::VERSION . ' is installed.' . PHP_EOL;
-                    echo 'This version requires components from Pop PHP Framework v' .
+                    echo PHP_EOL . 'Popcorn ' . self::VERSION . ' is installed.' . PHP_EOL;
+                    echo 'This version requires components from Pop PHP Framework ' .
                         $xml['required'] . '.' . PHP_EOL . PHP_EOL;
                     break;
 
