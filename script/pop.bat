@@ -32,7 +32,7 @@ IF "%1" == "install" (
             SET TEMPFILE=%2%
             SET TESTFILE=..\vendor\Popcorn\src\Pop\%TEMPFILE%%EXT%
         )
-        IF EXIST %TESTFILE% (
+        IF EXIST "%TESTFILE%" (
             FOR /f "delims=" %%i IN ('dir /B ..\vendor\Popcorn\src\Pop\*%EXT%') DO (
                 echo Unpacking %%i...
                 %CMD% ../vendor/Popcorn/src/Pop/%%i
