@@ -23,7 +23,7 @@ namespace Pop;
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
  * @license    https://raw.github.com/nicksagona/Popcorn/master/LICENSE.TXT     New BSD License
- * @version    1.0.1
+ * @version    1.0.2
  */
 class Pop
 {
@@ -31,7 +31,7 @@ class Pop
     /**
      * Current version
      */
-    const VERSION = '1.0.1';
+    const VERSION = '1.0.2';
 
     /**
      * Array of available namespaces prefixes.
