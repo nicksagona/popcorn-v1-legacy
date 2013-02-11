@@ -714,7 +714,7 @@ class Project
                     echo PHP_EOL . 'Available Components for Popcorn:';
                     echo PHP_EOL . '=================================' . PHP_EOL;
                     foreach ($xml['components'] as $comp => $value) {
-                        $prefix = (file_exists(__DIR__ . DIRECTORY_SEPARATOR . $comp)) ? ' [i] ' : '     ';
+                        $prefix = (file_exists(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . $comp)) ? ' [i] ' : '     ';
                         echo $prefix . $comp . PHP_EOL;
                     }
                     echo PHP_EOL;
@@ -777,7 +777,7 @@ class Project
 
                     // Check which components are already installed
                     foreach ($files as $file) {
-                        if (is_dir(__DIR__ . DIRECTORY_SEPARATOR . $file) && !in_array($file, $this->defaults)) {
+                        if (is_dir(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . $file) && !in_array($file, $this->defaults)) {
                             $installed[] = $file;
                         }
                     }
@@ -867,12 +867,12 @@ class Project
                             } else if (in_array($comp, $this->defaults)) {
                                 echo 'Skipping ' . $comp . '. It is a default component.';
                             // If component is not installed or does not exist
-                            } else if (!file_exists(__DIR__ . DIRECTORY_SEPARATOR . $comp)) {
+                            } else if (!file_exists(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . $comp)) {
                                 echo 'Skipping ' . $comp . '. ' . (array_key_exists($comp, $xml['components']) ? 'It is not installed.' : 'It does not exist');
                             // Else, remove it
                             } else {
                                 echo 'Removing ' . $comp;
-                                $dir = new \Pop\File\Dir(__DIR__ . DIRECTORY_SEPARATOR . $comp);
+                                $dir = new \Pop\File\Dir(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . $comp);
                                 $dir->emptyDir(null, true);
                             }
                             echo PHP_EOL;
@@ -1008,7 +1008,7 @@ class Project
      */
     protected function download($component, $ext)
     {
-        $archive = __DIR__ . DIRECTORY_SEPARATOR . $component . $ext;
+        $archive = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . $component . $ext;
         $file = fopen ($this->url . '/' . $component . $ext, "rb");
         if ($file) {
             $arc = fopen ($archive, "wb");
