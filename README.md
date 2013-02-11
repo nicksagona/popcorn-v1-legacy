@@ -1,9 +1,9 @@
-Popcorn Micro-Framework v1.0.2
+Popcorn Micro-Framework v1.1.0
 ==============================
 
 RELEASE INFORMATION
 -------------------
-Popcorn Micro-Framework 1.0.2 Release  
+Popcorn Micro-Framework 1.1.0 Release  
 Released February 11, 2013
 
 OVERVIEW
@@ -32,6 +32,7 @@ FEATURES
 
 DOCUMENTATION
 -------------
+* [Main Website](http://popcorn.popphp.org/)
 * [API Documentation](http://popcorn.popphp.org/docs/api/)
 * [Unit Test Code Coverage](http://popcorn.popphp.org/docs/cc/)
 

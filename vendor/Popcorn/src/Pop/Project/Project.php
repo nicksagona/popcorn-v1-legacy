@@ -23,7 +23,7 @@ namespace Pop\Project;
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
  * @license    https://raw.github.com/nicksagona/Popcorn/master/LICENSE.TXT     New BSD License
- * @version    1.0.2
+ * @version    1.1.0
  */
 class Project
 {
@@ -31,7 +31,7 @@ class Project
     /**
      * Current version
      */
-    const VERSION = '1.0.2';
+    const VERSION = '1.1.0';
 
     /**
      * Current URL
@@ -133,6 +133,7 @@ class Project
         'File',
         'Http',
         'Mvc',
+        'Project',
         'Service',
         'Web'
     );
@@ -772,7 +773,7 @@ class Project
                     $deps = array();
                     $installed = array();
                     $skip = array();
-                    $dir = new \Pop\File\Dir(__DIR__);
+                    $dir = new \Pop\File\Dir(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR);
                     $files = $dir->getFiles();
 
                     // Check which components are already installed
