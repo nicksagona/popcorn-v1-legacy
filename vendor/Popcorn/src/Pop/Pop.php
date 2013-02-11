@@ -34,6 +34,11 @@ class Pop
     const VERSION = '1.0.2';
 
     /**
+     * Current URL
+     */
+    const URL = 'http://popcorn.popphp.org/version.txt';
+
+    /**
      * Array of available namespaces prefixes.
      * @var array
      */
@@ -679,9 +684,14 @@ class Pop
             switch ($command) {
                 // Show the version
                 case 'version':
-                    echo PHP_EOL . 'Popcorn ' . self::VERSION . ' is installed.' . PHP_EOL;
-                    echo 'This version requires components from Pop PHP Framework ' .
-                        $xml['required'] . '.' . PHP_EOL . PHP_EOL;
+                    $latest = null;
+                    $handle = fopen(self::URL, 'r');
+                    if ($handle !== false) {
+                        $latest = stream_get_contents($handle);
+                        fclose($handle);
+                    }
+                    echo PHP_EOL . 'Popcorn ' . self::VERSION . ' is installed and uses components from Pop PHP Framework ' . $xml['required'] . '.';
+                    echo PHP_EOL . 'Popcorn ' . trim($latest) . ' is the latest available.' . PHP_EOL . PHP_EOL;
                     break;
 
                 // Display help
