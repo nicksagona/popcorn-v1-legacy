@@ -145,7 +145,7 @@ compatible components from the Pop PHP Framework
 ~/Popcorn/script$ ./pop install Db Form
 
 // Remove some components
-~/Popcorn/script$ ./pop remove Auth Record
+~/Popcorn/script$ ./pop remove Auth Image
 </pre>
 
 ### Via Windows Using the Batch Script
@@ -161,5 +161,5 @@ C:\Popcorn\script>pop list
 C:\Popcorn\script>pop install Db Form
 
 // Remove some components
-C:\Popcorn\script>pop remove Auth Record
+C:\Popcorn\script>pop remove Auth Image
 </pre>
