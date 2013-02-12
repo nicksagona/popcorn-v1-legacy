@@ -12,7 +12,7 @@ CMD=
 
 if [ "$TAR" != "" ]; then
     EXT=".tar.gz"
-    CMD=$( which tar )" -C ../vendor/Popcorn/src/Pop -xpf"
+    CMD=$( which tar )" -C ../vendor/Popcorn/src/Pop -xpzf"
 elif [ "$ZIP" != "" ]; then
     EXT=".zip"
     CMD=$( which unzip )" -q -d ../vendor/Popcorn/src/Pop"
