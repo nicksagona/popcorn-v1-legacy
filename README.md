@@ -94,9 +94,8 @@ You'll need this at the top of your main script:
 
     $pop->run();
 
-An additional feature is "auto-routing" to a controller class
-matching the URI to the method. So, for example, this will work
-for the URI "/hello" as well
+An additional feature is "auto-routing" in which the URI is matched to the method within
+the controller class. So, for example, this will work for the URI "/hello" as well:
 
     $pop = new Pop\Pop();
 
