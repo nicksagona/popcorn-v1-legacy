@@ -96,8 +96,8 @@ You'll need this at the top of your main script:
 
 ##### Auto-Routing
 
-An additional feature is "auto-routing" in which the URI is mapped to the method within
-the controller class. So, for example, this will work for the URI "/hello" as well:
+An additional feature is "auto-routing" in which the URI is mapped to the method within the
+controller class. So, in the above example, this will work for the URI "/hello" as well:
 
     $pop = new Pop\Pop();
 
