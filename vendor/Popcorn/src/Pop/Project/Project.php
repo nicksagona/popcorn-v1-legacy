@@ -573,11 +573,12 @@ class Project
         // If the route is valid, call the assigned action
         if ($this->isValidRequest($uri) && (count($params) == count($route[$uri]['params']))) {
             $params = $this->getRequestParams($route[$uri]);
-            $this->result = call_user_func_array($this->getCallable($route[$uri]['action']), $params);
+            $method = ($uri == '/') ? 'index' : substr($uri, 1);
+            $this->result = call_user_func_array($this->getCallable($route[$uri]['action'], $method), $params);
         // Else, trigger the error action
         } else {
             if (null !== $this->routes['error']) {
-                $this->result = call_user_func_array($this->getCallable($this->routes['error']), array());
+                $this->result = call_user_func_array($this->getCallable($this->routes['error'], 'error'), array());
             } else {
                 throw new \Pop\Exception('Error: No error action has been defined to handle errors.');
             }
@@ -985,16 +986,21 @@ class Project
     /**
      * Get and validate the callable action
      *
-     * @param  mixed $callable
+     * @param  mixed  $callable
+     * @param  string $method
      * @return mixed
      */
-    protected function getCallable($callable)
+    protected function getCallable($callable, $method = null)
     {
-        if (is_string($callable) && (strpos($callable, '->') !== false)) {
-            $ary = explode('->', $callable);
-            $class = $ary[0];
-            $method = $ary[1];
-            $callable = array(new $class(), $method);
+        if (is_string($callable) && (strpos($callable, '::') === false)) {
+            if (strpos($callable, '->') !== false) {
+                $ary = explode('->', $callable);
+                $class = $ary[0];
+                $method = $ary[1];
+                $callable = array(new $class(), $method);
+            } else if (null !== $method) {
+                $callable = array(new $callable(), $method);
+            }
         }
 
         return $callable;

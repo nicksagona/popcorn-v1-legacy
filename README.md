@@ -40,92 +40,90 @@ GETTING STARTED
 ---------------
 You'll need this at the top of your main script:
 
-<pre>
-require_once '../vendor/Popcorn/src/Pop/Pop.php';
-</pre>
+    require_once '../vendor/Popcorn/src/Pop/Pop.php';
 
 ### A Simple Example
-<pre>
-$pop = new Pop\Pop();
+    $pop = new Pop\Pop();
 
-$pop->get('/hello/:name', function($name) {
-    echo 'Hello, ' . ucfirst($name) . '!';
-});
+    $pop->get('/hello/:name', function($name) {
+        echo 'Hello, ' . ucfirst($name) . '!';
+    });
 
-$pop->run();
-</pre>
+    $pop->run();
 
 ### A View/Template Example
-<pre>
-$pop = new Pop\Pop();
+    $pop = new Pop\Pop();
 
-$pop->setViewPath('./view');
+    $pop->setViewPath('./view');
 
-$pop->get('/hello/:name', function($name) {
-    return new Pop\Mvc\Model(array('name' => $name));
-});
+    $pop->get('/hello/:name', function($name) {
+        return new Pop\Mvc\Model(array('name' => $name));
+    });
 
-// When the app runs, it will map to a PHTML view file and
-// push the above model object to that view template, in
-// this case, './view/hello.phtml'.
-$pop->run();
-</pre>
+    // When the app runs, it will map to a PHTML view file and
+    // push the above model object to that view template, in
+    // this case, './view/hello.phtml'.
+    $pop->run();
 
 ### A Class/Method Example
-<pre>
-class Foo
-{
-    public static function factory()
+
+    class Foo
     {
-        return new Pop\Mvc\Model(array('title' => 'Hello, World!'));
+        public static function factory()
+        {
+            return new Pop\Mvc\Model(array('title' => 'Hello, World!'));
+        }
+
+        public function hello($name)
+        {
+            return new Pop\Mvc\Model(array('name' => $name));
+        }
+
+        public function error()
+        {
+            return new Pop\Mvc\Model(array('error' => '404 Error: Page Not Found!'));
+        }
     }
 
-    public function bar($name)
-    {
-        return new Pop\Mvc\Model(array('name' => $name));
-    }
+    $pop = new Pop\Pop();
 
-    public function error()
-    {
-        return new Pop\Mvc\Model(array('error' => '404 Error: Page Not Found!'));
-    }
-}
+    $pop->setViewPath('./view');
+    $pop->get('/', 'Foo::factory');
+    $pop->get('/hello/:name*', 'Foo->hello');
+    $pop->error(array(new Foo(), 'error'));
 
-$pop = new Pop\Pop();
+    $pop->run();
 
-$pop->setViewPath('./view');
-$pop->get('/', 'Foo::factory');
-$pop->get('/hello/:name*', 'Foo->bar');
-$pop->error(array(new Foo(), 'error'));
+An additional feature is "auto-routing" to a controller class
+matching the URI to the method. So, for example, this will work
+for the URI "/hello" as well
 
-$pop->run();
-</pre>
+    $pop = new Pop\Pop();
+
+    // Auto-routes to the "hello" method
+    $pop->get('/hello/:name*', 'Foo');
 
 ### A Wildcard Example
-<pre>
-$pop = new Pop\Pop();
+    $pop = new Pop\Pop();
 
-// The variable $name is populated with an array of values
-// from the URI, such as: /hello/john/t/doe
-$pop->get('/hello/:name*', function($name) {
-    // Dumps array('john', 't', 'doe')
-    print_r($name);
-});
+    // The variable $name is populated with an array of values
+    // from the URI, such as: /hello/john/t/doe
+    $pop->get('/hello/:name*', function($name) {
+        // Dumps array('john', 't', 'doe')
+        print_r($name);
+    });
 
-$pop->run();
-</pre>
+    $pop->run();
 
 ### A Multiple Routes Example
-<pre>
-$func = function($id) {
-    // Some function that handles GET, POST, etc.
-}
+    $func = function($id) {
+        // Some function that handles GET, POST, etc.
+    }
 
-$pop = new Pop\Pop();
-$pop->route('get,post', '/user/:id', $func($id));
+    $pop = new Pop\Pop();
+    $pop->route('get,post', '/user/:id', $func($id));
 
-$pop->run();
-</pre>
+    $pop->run();
 
 USING THE PACKAGE MANAGER
 -------------------------
@@ -135,32 +133,29 @@ compatible components from the Pop PHP Framework
 
 ### Via Linux/Unix Using the Bash Script
 
-<pre>
-// Display help
-~/Popcorn/script$ ./pop help
+    // Display help
+    ~/Popcorn/script$ ./pop help
 
-// List available components
-~/Popcorn/script$ ./pop list
+    // List available components
+    ~/Popcorn/script$ ./pop list
 
-// Install some components
-~/Popcorn/script$ ./pop install Db Form
+    // Install some components
+    ~/Popcorn/script$ ./pop install Db Form
 
-// Remove some components
-~/Popcorn/script$ ./pop remove Auth Image
-</pre>
+    // Remove some components
+    ~/Popcorn/script$ ./pop remove Auth Image
+
 
 ### Via Windows Using the Batch Script
 
-<pre>
-// Display help
-C:\Popcorn\script>pop help
+    // Display help
+    C:\Popcorn\script>pop help
 
-// List available components
-C:\Popcorn\script>pop list
+    // List available components
+    C:\Popcorn\script>pop list
 
-// Install some components
-C:\Popcorn\script>pop install Db Form
+    // Install some components
+    C:\Popcorn\script>pop install Db Form
 
-// Remove some components
-C:\Popcorn\script>pop remove Auth Image
-</pre>
+    // Remove some components
+    C:\Popcorn\script>pop remove Auth Image
