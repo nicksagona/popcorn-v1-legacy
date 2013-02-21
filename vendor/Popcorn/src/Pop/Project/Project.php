@@ -993,13 +993,24 @@ class Project
     protected function getCallable($callable, $method = null)
     {
         if (is_string($callable) && (strpos($callable, '::') === false)) {
+            // If the string contains -> notation, get the method from that
             if (strpos($callable, '->') !== false) {
                 $ary = explode('->', $callable);
                 $class = $ary[0];
                 $method = $ary[1];
-                $callable = array(new $class(), $method);
+
+                // If the class is a child of Pop\Mvc\Controller,
+                // pass in the Pop project instance
+                $parents = class_parents($class);
+                $obj = (in_array('Pop\Mvc\Controller', $parents)) ? new $class(null, null, $this) : new $class();
+                $callable = array($obj, $method);
+            // Else call using the method passed from the URI
             } else if (null !== $method) {
-                $callable = array(new $callable(), $method);
+                // If the class is a child of Pop\Mvc\Controller,
+                // pass in the Pop project instance
+                $parents = class_parents($callable);
+                $obj = (in_array('Pop\Mvc\Controller', $parents)) ? new $callable(null, null, $this) : new $callable();
+                $callable = array($obj, $method);
             }
         }
 

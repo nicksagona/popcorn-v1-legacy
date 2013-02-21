@@ -23,6 +23,20 @@ require_once __DIR__ . '/../../src/Pop/Pop.php';
 $_SERVER['REQUEST_METHOD'] = 'GET';
 $_SERVER['REQUEST_URI'] = '/hello/nick';
 
+class Foo
+{
+    public static function factory($name)
+    {
+        return $name . ' (factory)';
+    }
+
+    public function hello($name)
+    {
+        return $name;
+    }
+
+}
+
 class PopcornTest extends \PHPUnit_Framework_TestCase
 {
 
@@ -235,6 +249,33 @@ class PopcornTest extends \PHPUnit_Framework_TestCase
         $pop->get('/hello/:name', function($name) { return ucfirst($name); });
         $pop->run();
         $this->assertEquals('Nick', $pop->getResult());
+    }
+
+    public function testRunCallable()
+    {
+        global $_SERVER;
+        $pop = new \Pop\Pop();
+        $pop->get('/hello/:name', 'PopcornTest\Foo->hello');
+        $pop->run();
+        $this->assertEquals('nick', $pop->getResult());
+    }
+
+    public function testRunCallableAutoRoute()
+    {
+        global $_SERVER;
+        $pop = new \Pop\Pop();
+        $pop->get('/hello/:name', 'PopcornTest\Foo');
+        $pop->run();
+        $this->assertEquals('nick', $pop->getResult());
+    }
+
+    public function testRunCallableFactory()
+    {
+        global $_SERVER;
+        $pop = new \Pop\Pop();
+        $pop->get('/hello/:name', 'PopcornTest\Foo::factory');
+        $pop->run();
+        $this->assertEquals('nick (factory)', $pop->getResult());
     }
 
     public function testWildcard()
