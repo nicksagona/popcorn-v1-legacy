@@ -999,17 +999,22 @@ class Project
                 $class = $ary[0];
                 $method = $ary[1];
 
-                // If the class is a child of Pop\Mvc\Controller,
-                // pass in the Pop project instance
-                $parents = class_parents($class);
-                $obj = (in_array('Pop\Mvc\Controller', $parents)) ? new $class(null, null, $this) : new $class();
+                $obj = new $class();
+
+                // If the object is a controller, set the project object
+                if ($obj instanceof \Pop\Mvc\Controller) {
+                    $obj->setProject($this);
+                }
+
                 $callable = array($obj, $method);
             // Else call using the method passed from the URI
             } else if (null !== $method) {
-                // If the class is a child of Pop\Mvc\Controller,
-                // pass in the Pop project instance
-                $parents = class_parents($callable);
-                $obj = (in_array('Pop\Mvc\Controller', $parents)) ? new $callable(null, null, $this) : new $callable();
+                $obj = new $callable();
+
+                // If the object is a controller, set the project object
+                if ($obj instanceof \Pop\Mvc\Controller) {
+                    $obj->setProject($this);
+                }
                 $callable = array($obj, $method);
             }
         }
