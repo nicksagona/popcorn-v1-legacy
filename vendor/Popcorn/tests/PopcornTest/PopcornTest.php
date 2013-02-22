@@ -18,12 +18,13 @@ namespace PopcornTest;
 
 // Require the library's autoloader.
 require_once __DIR__ . '/../../src/Pop/Pop.php';
+require_once __DIR__ . '/../../src/Pop/Mvc/Controller.php';
 
 // Set test SERVER data
 $_SERVER['REQUEST_METHOD'] = 'GET';
 $_SERVER['REQUEST_URI'] = '/hello/nick';
 
-class Foo
+class Foo extends \Pop\Mvc\Controller
 {
     public static function factory($name)
     {
