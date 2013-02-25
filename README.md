@@ -21,7 +21,7 @@ FEATURES
 --------
 * Routing URLs to functions or class/method combinations
 * Support for standard HTTP methods
-* URI segment to parameter mapping 
+* URL segment to parameter mapping 
     - via direct variables
     - via associative array of values
     - via numeric array of values
@@ -100,8 +100,8 @@ You'll need this at the top of your main script:
 
 ##### Auto-Routing
 
-An additional feature is "auto-routing" in which the URI is mapped to the method within the
-controller class. So, in the above example, this will work for the URI "/hello" as well:
+An additional feature is "auto-routing" in which the URL is mapped to the method within the
+controller class. So, in the above example, this will work for the URL "/hello" as well:
 
     $pop = new Pop\Pop();
 
@@ -112,7 +112,7 @@ controller class. So, in the above example, this will work for the URI "/hello" 
     $pop = new Pop\Pop();
 
     // The variable $name is populated with an array of values
-    // from the URI, such as: /hello/john/t/doe
+    // from the URL, such as: /hello/john/t/doe
     $pop->get('/hello/:name*', function($name) {
         // Dumps array('john', 't', 'doe')
         print_r($name);
