@@ -143,6 +143,23 @@ controller class. So, in the above example, this will work for the URL "/hello" 
 
     $pop->run();
 
+### Using Strict Mode
+    $pop = new Pop\Pop();
+    $pop->setStrict(true);
+
+    $pop->get('/hello/:fname/:lname', function($fname, $lname) {
+        echo 'Hello, ' . ucfirst($fname) . ' ' . ucfirst($lname) . '!' . PHP_EOL;
+    });
+
+    // Strict mode means the only valid URL to the above route is:
+    /hello/john/doe
+
+    // Anything else will fail, for example:
+    /hello
+    /hello/
+    /hello/john/doe/extra
+
+
 USING THE PACKAGE MANAGER
 -------------------------
 
