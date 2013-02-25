@@ -151,12 +151,15 @@ controller class. So, in the above example, this will work for the URL "/hello" 
         echo 'Hello, ' . ucfirst($fname) . ' ' . ucfirst($lname) . '!' . PHP_EOL;
     });
 
-    // Strict mode means the only valid URL to the above route is:
+    // Strict mode means the only valid URLs to the above route are:
     /hello/john/doe
+    /hello/john/doe/
 
     // Anything else will fail, for example:
     /hello
     /hello/
+    /hello/john
+    /hello/john/
     /hello/john/doe/extra
 
 
