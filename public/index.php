@@ -6,7 +6,7 @@ try {
     $pop = new Pop\Pop();
 
     // Set the URI mapping to strict
-    $pop->setStrict(true);
+    //$pop->setStrict(true);
 
     /**
      * Basic routing using closures
