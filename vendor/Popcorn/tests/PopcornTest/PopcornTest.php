@@ -47,6 +47,13 @@ class PopcornTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Pop\Pop', $pop);
     }
 
+    public function testStrict()
+    {
+        $pop = new \Pop\Pop();
+        $pop->setStrict(false);
+        $this->assertFalse($pop->isStrict());
+    }
+
     public function testRegister()
     {
         $pop = new \Pop\Pop();
@@ -149,6 +156,27 @@ class PopcornTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(1, count($pop->getRoutes('head')));
     }
 
+    public function testConnectRoute()
+    {
+        $pop = new \Pop\Pop();
+        $pop->connect('/hello/:name', function($name) { echo $name; });
+        $this->assertEquals(1, count($pop->getRoutes('connect')));
+    }
+
+    public function testTraceRoute()
+    {
+        $pop = new \Pop\Pop();
+        $pop->trace('/hello/:name', function($name) { echo $name; });
+        $this->assertEquals(1, count($pop->getRoutes('trace')));
+    }
+
+    public function testPatchRoute()
+    {
+        $pop = new \Pop\Pop();
+        $pop->patch('/hello/:name', function($name) { echo $name; });
+        $this->assertEquals(1, count($pop->getRoutes('patch')));
+    }
+
     public function testErrorRoute()
     {
         $pop = new \Pop\Pop();
@@ -198,6 +226,7 @@ class PopcornTest extends \PHPUnit_Framework_TestCase
         global $_SERVER;
         $_SERVER['REQUEST_METHOD'] = 'POST';
         $pop = new \Pop\Pop();
+        $pop->setStrict(true);
         $pop->post('/hello/:name', function($name) { return ucfirst($name); });
         $pop->run();
         $this->assertEquals(200, $pop->getResponse()->getCode());
@@ -239,6 +268,36 @@ class PopcornTest extends \PHPUnit_Framework_TestCase
         $_SERVER['REQUEST_METHOD'] = 'HEAD';
         $pop = new \Pop\Pop();
         $pop->head('/hello/:name', function($name) { return ucfirst($name); });
+        $pop->run();
+        $this->assertEquals(200, $pop->getResponse()->getCode());
+    }
+
+    public function testTraceMethod()
+    {
+        global $_SERVER;
+        $_SERVER['REQUEST_METHOD'] = 'TRACE';
+        $pop = new \Pop\Pop();
+        $pop->trace('/hello/:name', function($name) { return ucfirst($name); });
+        $pop->run();
+        $this->assertEquals(200, $pop->getResponse()->getCode());
+    }
+
+    public function testConnectMethod()
+    {
+        global $_SERVER;
+        $_SERVER['REQUEST_METHOD'] = 'CONNECT';
+        $pop = new \Pop\Pop();
+        $pop->connect('/hello/:name', function($name) { return ucfirst($name); });
+        $pop->run();
+        $this->assertEquals(200, $pop->getResponse()->getCode());
+    }
+
+    public function testPatchMethod()
+    {
+        global $_SERVER;
+        $_SERVER['REQUEST_METHOD'] = 'PATCH';
+        $pop = new \Pop\Pop();
+        $pop->patch('/hello/:name', function($name) { return ucfirst($name); });
         $pop->run();
         $this->assertEquals(200, $pop->getResponse()->getCode());
     }

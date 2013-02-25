@@ -1,10 +1,10 @@
-Popcorn Micro-Framework v1.1.0
+Popcorn Micro-Framework v1.1.1
 ==============================
 
 RELEASE INFORMATION
 -------------------
-Popcorn Micro-Framework 1.1.0 Release  
-Released February 11, 2013
+Popcorn Micro-Framework 1.1.1 Release  
+Released February 25, 2013
 
 OVERVIEW
 --------
@@ -21,6 +21,10 @@ FEATURES
 --------
 * Routing URLs to functions or class/method combinations
 * Support for standard HTTP methods
+* URI segment to parameter mapping 
+    - via direct variables
+    - via associative array of values
+    - via numeric array of values
 * Wildcard support
 * Event handling
 * Service management

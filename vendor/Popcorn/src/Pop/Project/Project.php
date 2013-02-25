@@ -23,7 +23,7 @@ namespace Pop\Project;
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
  * @license    https://raw.github.com/nicksagona/Popcorn/master/LICENSE.TXT     New BSD License
- * @version    1.1.0
+ * @version    1.1.1
  */
 class Project
 {
@@ -31,12 +31,18 @@ class Project
     /**
      * Current version
      */
-    const VERSION = '1.1.0';
+    const VERSION = '1.1.1';
 
     /**
      * Current URL
      */
     const URL = 'http://popcorn.popphp.org/version.txt';
+
+    /**
+     * Strict URI parameter mapping flag
+     * @var boolean
+     */
+    protected $strict = false;
 
     /**
      * Array of available namespaces prefixes.
@@ -80,11 +86,14 @@ class Project
      */
     protected $routes = array(
         'get'     => array(),
+        'head'    => array(),
         'post'    => array(),
         'put'     => array(),
         'delete'  => array(),
+        'trace'   => array(),
         'options' => array(),
-        'head'    => array(),
+        'connect' => array(),
+        'patch'   => array(),
         'error'   => null
     );
 
@@ -162,6 +171,28 @@ class Project
     }
 
     /**
+     * Set strict mapping to URI parameters
+     *
+     * @param  boolean $strict
+     * @return \Pop\Pop
+     */
+    public function setStrict($strict)
+    {
+        $this->strict = (boolean)$strict;
+        return $this;
+    }
+
+    /**
+     * Method to get whether or not strict mapping is set
+     *
+     * @return boolean
+     */
+    public function isStrict()
+    {
+        return $this->strict;
+    }
+
+    /**
      * Register a namespace and directory location with the autoloader
      *
      * @param  string $namespace
@@ -236,7 +267,7 @@ class Project
     }
 
     /**
-     * Add a URL to the 'get' route
+     * Add a URI to the GET route
      *
      * @param  string $uri
      * @param  mixed $action
@@ -244,94 +275,22 @@ class Project
      */
     public function get($uri, $action)
     {
+        $asArray = (strpos($uri, '#') !== false);
+
         $params = $this->getUriParams($uri);
         $uri = $this->getUriAction($uri);
+
         $this->routes['get'][$uri] = array(
-            'action' => $action,
-            'params' => $params
+            'action'  => $action,
+            'params'  => $params,
+            'asArray' => $asArray
         );
 
         return $this;
     }
 
     /**
-     * Add a URL to the 'post' route
-     *
-     * @param  string $uri
-     * @param  mixed $action
-     * @return \Pop\Pop
-     */
-    public function post($uri, $action)
-    {
-        $params = $this->getUriParams($uri);
-        $uri = $this->getUriAction($uri);
-        $this->routes['post'][$uri] = array(
-            'action' => $action,
-            'params' => $params
-        );
-
-        return $this;
-    }
-
-    /**
-     * Add a URL to the 'put' route
-     *
-     * @param  string $uri
-     * @param  mixed $action
-     * @return \Pop\Pop
-     */
-    public function put($uri, $action)
-    {
-        $params = $this->getUriParams($uri);
-        $uri = $this->getUriAction($uri);
-        $this->routes['put'][$uri] = array(
-            'action' => $action,
-            'params' => $params
-        );
-
-        return $this;
-    }
-
-    /**
-     * Add a URL to the 'delete' route
-     *
-     * @param  string $uri
-     * @param  mixed $action
-     * @return \Pop\Pop
-     */
-    public function delete($uri, $action)
-    {
-        $params = $this->getUriParams($uri);
-        $uri = $this->getUriAction($uri);
-        $this->routes['delete'][$uri] = array(
-            'action' => $action,
-            'params' => $params
-        );
-
-        return $this;
-    }
-
-    /**
-     * Add a URL to the 'options' route
-     *
-     * @param  string $uri
-     * @param  mixed $action
-     * @return \Pop\Pop
-     */
-    public function options($uri, $action)
-    {
-        $params = $this->getUriParams($uri);
-        $uri = $this->getUriAction($uri);
-        $this->routes['options'][$uri] = array(
-            'action' => $action,
-            'params' => $params
-        );
-
-        return $this;
-    }
-
-    /**
-     * Add a URL to the 'head' route
+     * Add a URI to the HEAD route
      *
      * @param  string $uri
      * @param  mixed $action
@@ -339,18 +298,183 @@ class Project
      */
     public function head($uri, $action)
     {
+        $asArray = (strpos($uri, '#') !== false);
+
         $params = $this->getUriParams($uri);
         $uri = $this->getUriAction($uri);
+
         $this->routes['head'][$uri] = array(
             'action' => $action,
-            'params' => $params
+            'params' => $params,
+            'asArray' => $asArray
         );
 
         return $this;
     }
 
     /**
-     * Add an action to the 'error' route
+     * Add a URI to the POST route
+     *
+     * @param  string $uri
+     * @param  mixed $action
+     * @return \Pop\Pop
+     */
+    public function post($uri, $action)
+    {
+        $asArray = (strpos($uri, '#') !== false);
+
+        $params = $this->getUriParams($uri);
+        $uri = $this->getUriAction($uri);
+
+        $this->routes['post'][$uri] = array(
+            'action' => $action,
+            'params' => $params,
+            'asArray' => $asArray
+        );
+
+        return $this;
+    }
+
+    /**
+     * Add a URI to the PUT route
+     *
+     * @param  string $uri
+     * @param  mixed $action
+     * @return \Pop\Pop
+     */
+    public function put($uri, $action)
+    {
+        $asArray = (strpos($uri, '#') !== false);
+
+        $params = $this->getUriParams($uri);
+        $uri = $this->getUriAction($uri);
+
+        $this->routes['put'][$uri] = array(
+            'action' => $action,
+            'params' => $params,
+            'asArray' => $asArray
+        );
+
+        return $this;
+    }
+
+    /**
+     * Add a URI to the DELETE route
+     *
+     * @param  string $uri
+     * @param  mixed $action
+     * @return \Pop\Pop
+     */
+    public function delete($uri, $action)
+    {
+        $asArray = (strpos($uri, '#') !== false);
+
+        $params = $this->getUriParams($uri);
+        $uri = $this->getUriAction($uri);
+
+        $this->routes['delete'][$uri] = array(
+            'action' => $action,
+            'params' => $params,
+            'asArray' => $asArray
+        );
+
+        return $this;
+    }
+
+    /**
+     * Add a URI to the TRACE route
+     *
+     * @param  string $uri
+     * @param  mixed $action
+     * @return \Pop\Pop
+     */
+    public function trace($uri, $action)
+    {
+        $asArray = (strpos($uri, '#') !== false);
+
+        $params = $this->getUriParams($uri);
+        $uri = $this->getUriAction($uri);
+
+        $this->routes['trace'][$uri] = array(
+            'action' => $action,
+            'params' => $params,
+            'asArray' => $asArray
+        );
+
+        return $this;
+    }
+
+    /**
+     * Add a URI to the OPTIONS route
+     *
+     * @param  string $uri
+     * @param  mixed $action
+     * @return \Pop\Pop
+     */
+    public function options($uri, $action)
+    {
+        $asArray = (strpos($uri, '#') !== false);
+
+        $params = $this->getUriParams($uri);
+        $uri = $this->getUriAction($uri);
+
+        $this->routes['options'][$uri] = array(
+            'action' => $action,
+            'params' => $params,
+            'asArray' => $asArray
+        );
+
+        return $this;
+    }
+
+    /**
+     * Add a URI to the CONNECT route
+     *
+     * @param  string $uri
+     * @param  mixed $action
+     * @return \Pop\Pop
+     */
+    public function connect($uri, $action)
+    {
+        $asArray = (strpos($uri, '#') !== false);
+
+        $params = $this->getUriParams($uri);
+        $uri = $this->getUriAction($uri);
+
+        $this->routes['connect'][$uri] = array(
+            'action' => $action,
+            'params' => $params,
+            'asArray' => $asArray
+        );
+
+        return $this;
+    }
+
+    /**
+     * Add a URI to the PATCH route
+     *
+     * @param  string $uri
+     * @param  mixed $action
+     * @return \Pop\Pop
+     */
+    public function patch($uri, $action)
+    {
+        $asArray = (strpos($uri, '#') !== false);
+
+        $params = $this->getUriParams($uri);
+        $uri = $this->getUriAction($uri);
+
+        $this->routes['patch'][$uri] = array(
+            'action' => $action,
+            'params' => $params,
+            'asArray' => $asArray
+        );
+
+        return $this;
+    }
+
+    /**
+     * Add an action to the ERROR route
      *
      * @param  mixed $action
      * @return \Pop\Pop
@@ -570,14 +694,19 @@ class Project
             $params = $this->getRequestParams($route[$uri]);
         }
 
-        // If the route is valid, call the assigned action
-        if ($this->isValidRequest($uri) && (count($params) == count($route[$uri]['params']))) {
-            $params = $this->getRequestParams($route[$uri]);
+        // If the request and parameters are valid, call the assigned action
+        if ($this->isValidRequest($uri) &&
+            $this->isValidParams($route[$uri]['params'], $params) &&
+            (count($params) == count($route[$uri]['params']))) {
+            $params = $this->getRequestParams($route[$uri], $route[$uri]['asArray']);
             $method = ($uri == '/') ? 'index' : substr($uri, 1);
             $this->result = call_user_func_array($this->getCallable($route[$uri]['action'], $method), $params);
         // Else, trigger the error action
         } else {
             if (null !== $this->routes['error']) {
+                if (!headers_sent()) {
+                    $this->response->sendHeaders();
+                }
                 $this->result = call_user_func_array($this->getCallable($this->routes['error'], 'error'), array());
             } else {
                 throw new \Pop\Exception('Error: No error action has been defined to handle errors.');
@@ -920,22 +1049,36 @@ class Project
             $params = explode('/:', $uri);
             unset($params[0]);
         }
-
+        foreach ($params as $key => $value) {
+            $params[$key] = str_replace('#', '', $value);
+        }
         return $params;
     }
 
     /**
      * Method to get the URI parameters
      *
-     * @param  array $route
+     * @param  array   $route
+     * @param  boolean $asArray
      * @return array
      */
-    protected function getRequestParams($route)
+    protected function getRequestParams($route, $asArray = false)
     {
         $requestParams = array();
         $params = $this->request->getPath();
 
         unset($params[0]);
+
+        // Handle trailing slash (last position empty)
+        if (empty($params[count($params)])) {
+            unset($params[count($params)]);
+        }
+
+        foreach ($params as $key => $value) {
+            if ($value == '') {
+                $params[$key] = null;
+            }
+        }
 
         foreach ($route['params'] as $key => $value) {
             if (substr($value, -1) == '*') {
@@ -943,6 +1086,11 @@ class Project
             } else {
                 $requestParams[$value] = (isset($params[$key])) ? $params[$key] : null;
             }
+        }
+
+        // If the returned parameter result should be an array
+        if ($asArray) {
+            $requestParams = array($requestParams);
         }
 
         return $requestParams;
@@ -956,31 +1104,48 @@ class Project
      */
     protected function isValidRequest($uri)
     {
-        $code = 404;
+        $code = (array_key_exists($uri, $this->routes[strtolower($this->request->getMethod())])) ? 200 : 404;
+        $this->response->setCode($code);
+        return ($code == 200);
+    }
 
-        if (($this->request->getMethod() == 'GET') &&
-            array_key_exists($uri, $this->routes['get'])) {
-            $code = 200;
-        } else if (($this->request->getMethod() == 'POST') &&
-            array_key_exists($uri, $this->routes['post'])) {
-            $code = 200;
-        } else if (($this->request->getMethod() == 'PUT') &&
-            array_key_exists($uri, $this->routes['put'])) {
-            $code = 200;
-        } else if (($this->request->getMethod() == 'DELETE') &&
-            array_key_exists($uri, $this->routes['delete'])) {
-            $code = 200;
-        } else if (($this->request->getMethod() == 'OPTIONS') &&
-            array_key_exists($uri, $this->routes['options'])) {
-            $code = 200;
-        } else if (($this->request->getMethod() == 'HEAD') &&
-            array_key_exists($uri, $this->routes['head'])) {
-            $code = 200;
+    /**
+     * Method to determine a valid parameters in strict mode
+     *
+     * @param  array $routeParams
+     * @param  array $uriParams
+     * @return boolean
+     */
+    protected function isValidParams($routeParams, $uriParams)
+    {
+        $result = true;
+
+        if ($this->strict) {
+            $requestParams = $this->request->getPath();
+            unset($requestParams[0]);
+
+            // Handle trailing slash (last position empty)
+            if (empty($requestParams[count($requestParams)])) {
+                unset($requestParams[count($requestParams)]);
+            }
+
+            // If any parameter value is not set, null or empty, set to false
+            foreach ($routeParams as $param) {
+                if (is_array($uriParams[$param]) && (in_array(null, $uriParams[$param]))) {
+                    $result = false;
+                } else if (!isset($uriParams[$param]) || empty($uriParams[$param])) {
+                    $result = false;
+                }
+            }
+
+            // If the number of requested parameters do not match
+            // the expected routed parameters, set to false
+            if (count($requestParams) != count($routeParams)) {
+                $result = false;
+            }
         }
 
-        $this->response->setCode($code);
-
-        return ($code == 200);
+        return $result;
     }
 
     /**
