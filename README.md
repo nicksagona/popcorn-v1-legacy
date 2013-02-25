@@ -144,6 +144,11 @@ controller class. So, in the above example, this will work for the URL "/hello" 
     $pop->run();
 
 ### Using Strict Mode
+
+Using strict mode simply enforces the correct parameter mapping dervied from the
+URL request. That way, it can take some burden off of your application from having
+to detect if the correct parameters have been passed.
+
     $pop = new Pop\Pop();
     $pop->setStrict(true);
 
@@ -151,7 +156,7 @@ controller class. So, in the above example, this will work for the URL "/hello" 
         echo 'Hello, ' . ucfirst($fname) . ' ' . ucfirst($lname) . '!' . PHP_EOL;
     });
 
-    // Strict mode means the only valid URLs to the above route are:
+    // In this case, with strict mode, the only valid URLs to the above route are:
     /hello/john/doe
     /hello/john/doe/
 
@@ -161,7 +166,6 @@ controller class. So, in the above example, this will work for the URL "/hello" 
     /hello/john
     /hello/john/
     /hello/john/doe/extra
-
 
 USING THE PACKAGE MANAGER
 -------------------------
