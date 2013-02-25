@@ -14,7 +14,7 @@ try {
 
     $pop->get('/', function() { echo 'Hello, World!' . PHP_EOL; });
 
-    // Direct variable mapping example, map to a string variable $name
+    // Direct variable mapping example, map values to variables $fname, $lname
     $pop->get('/hello/:fname/:lname', function($fname, $lname) {
         echo 'Hello, ' . ucfirst($fname) . ' ' . ucfirst($lname) . '!' . PHP_EOL;
     });

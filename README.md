@@ -49,7 +49,7 @@ You'll need this at the top of your main script:
 ### A Simple Example
     $pop = new Pop\Pop();
 
-    // Direct variable mapping example, map to a string variable $name
+    // Direct variable mapping example, map values to variables $fname, $lname
     $pop->get('/hello/:fname/:lname', function($fname, $lname) {
         echo 'Hello, ' . ucfirst($fname) . ' ' . ucfirst($lname) . '!' . PHP_EOL;
     });
@@ -61,7 +61,7 @@ You'll need this at the top of your main script:
 
     // Associative array example, map to an associative array with keys 'name' and 'id'
     $pop->get('/user/:name/:id#', function($user) {
-        // Dumps array('name' => 'John', 'id => 1001)
+        // Dumps array('name' => 'John', 'id' => 1001)
         print_r($user);
     });
 
