@@ -118,7 +118,7 @@ controller class. So, in the above example, this will work for the URL "/hello" 
 
     $pop = new Pop\Pop();
 
-    // Auto-routes to the "hello" method
+    // Auto-routes to the "hello()" method in the class "Foo"
     $pop->get('/hello/:name*', 'Foo');
 
 ### A Wildcard Example
