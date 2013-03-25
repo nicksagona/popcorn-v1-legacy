@@ -514,6 +514,8 @@ class Project
                 $this->$method($uri, $action);
             }
         }
+
+        return $this;
     }
 
     /**
