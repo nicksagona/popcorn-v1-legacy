@@ -278,7 +278,7 @@ class Project
         $asArray = (strpos($uri, '#') !== false);
 
         $params = $this->getUriParams($uri);
-        $uri = $this->getUriAction($uri);
+        $uri = $this->getUri($uri);
 
         $this->routes['get'][$uri] = array(
             'action'  => $action,
@@ -301,7 +301,7 @@ class Project
         $asArray = (strpos($uri, '#') !== false);
 
         $params = $this->getUriParams($uri);
-        $uri = $this->getUriAction($uri);
+        $uri = $this->getUri($uri);
 
         $this->routes['head'][$uri] = array(
             'action' => $action,
@@ -324,7 +324,7 @@ class Project
         $asArray = (strpos($uri, '#') !== false);
 
         $params = $this->getUriParams($uri);
-        $uri = $this->getUriAction($uri);
+        $uri = $this->getUri($uri);
 
         $this->routes['post'][$uri] = array(
             'action' => $action,
@@ -347,7 +347,7 @@ class Project
         $asArray = (strpos($uri, '#') !== false);
 
         $params = $this->getUriParams($uri);
-        $uri = $this->getUriAction($uri);
+        $uri = $this->getUri($uri);
 
         $this->routes['put'][$uri] = array(
             'action' => $action,
@@ -370,7 +370,7 @@ class Project
         $asArray = (strpos($uri, '#') !== false);
 
         $params = $this->getUriParams($uri);
-        $uri = $this->getUriAction($uri);
+        $uri = $this->getUri($uri);
 
         $this->routes['delete'][$uri] = array(
             'action' => $action,
@@ -393,7 +393,7 @@ class Project
         $asArray = (strpos($uri, '#') !== false);
 
         $params = $this->getUriParams($uri);
-        $uri = $this->getUriAction($uri);
+        $uri = $this->getUri($uri);
 
         $this->routes['trace'][$uri] = array(
             'action' => $action,
@@ -416,7 +416,7 @@ class Project
         $asArray = (strpos($uri, '#') !== false);
 
         $params = $this->getUriParams($uri);
-        $uri = $this->getUriAction($uri);
+        $uri = $this->getUri($uri);
 
         $this->routes['options'][$uri] = array(
             'action' => $action,
@@ -439,7 +439,7 @@ class Project
         $asArray = (strpos($uri, '#') !== false);
 
         $params = $this->getUriParams($uri);
-        $uri = $this->getUriAction($uri);
+        $uri = $this->getUri($uri);
 
         $this->routes['connect'][$uri] = array(
             'action' => $action,
@@ -462,7 +462,7 @@ class Project
         $asArray = (strpos($uri, '#') !== false);
 
         $params = $this->getUriParams($uri);
-        $uri = $this->getUriAction($uri);
+        $uri = $this->getUri($uri);
 
         $this->routes['patch'][$uri] = array(
             'action' => $action,
@@ -684,8 +684,8 @@ class Project
     public function run()
     {
         // Populate necessary variables
-        $uri = $this->getUriAction($this->request->getRequestUri());
         $route = $this->routes[strtolower($this->request->getMethod())];
+        $uri = $this->getUriMatch($this->request->getRequestUri(), $route);
         $params = array();
 
         // Trigger any pre-route events
@@ -701,7 +701,7 @@ class Project
             $this->isValidParams($route[$uri]['params'], $params) &&
             (count($params) == count($route[$uri]['params']))) {
             $params = $this->getRequestParams($route[$uri], $route[$uri]['asArray']);
-            $method = ($uri == '/') ? 'index' : substr($uri, 1);
+            $method = (substr($uri, -1) == '/') ? 'index' : substr($uri, 1);
             $this->result = call_user_func_array($this->getCallable($route[$uri]['action'], $method), $params);
         // Else, trigger the error action
         } else {
@@ -1028,11 +1028,15 @@ class Project
      * @param  string $uri
      * @return string
      */
-    protected function getUriAction($uri)
+    protected function getUri($uri)
     {
-        if (substr_count($uri, '/') > 1) {
-            $uri = substr($uri, 1);
-            $uri = '/' . substr($uri, 0, strpos($uri, '/'));
+        //if (substr_count($uri, '/') > 1) {
+        //    $uri = substr($uri, 1);
+        //    $uri = '/' . substr($uri, 0, strpos($uri, '/'));
+        //}
+        // If URI has params
+        if (strpos($uri, '/:') !== false) {
+            $uri = substr($uri, 0, strpos($uri, '/:'));
         }
         return $uri;
     }
@@ -1055,6 +1059,26 @@ class Project
             $params[$key] = str_replace('#', '', $value);
         }
         return $params;
+    }
+
+    /**
+     * Method to match the requested URI to a routed URI
+     *
+     * @param  string $uri
+     * @param  array $route
+     * @return string
+     */
+    protected function getUriMatch($uri, $route)
+    {
+        $match = null;
+        foreach ($route as $key => $value) {
+            if (($key != '/') && ($uri != '/')) {
+                if (substr($uri, 0, strlen($key)) == $key) {
+                    $match = $key;
+                }
+            }
+        }
+        return $match;
     }
 
     /**
