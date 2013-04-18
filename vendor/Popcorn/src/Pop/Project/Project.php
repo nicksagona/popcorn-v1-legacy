@@ -693,15 +693,18 @@ class Project
 
         // Get params for the route
         if (isset($route[$uri])) {
-            $params = $this->getRequestParams($route[$uri]);
+            $params = $this->getRequestParams($uri, $route[$uri]);
         }
 
         // If the request and parameters are valid, call the assigned action
         if ($this->isValidRequest($uri) &&
             $this->isValidParams($route[$uri]['params'], $params) &&
             (count($params) == count($route[$uri]['params']))) {
-            $params = $this->getRequestParams($route[$uri], $route[$uri]['asArray']);
-            $method = (substr($uri, -1) == '/') ? 'index' : substr($uri, 1);
+            $params = $this->getRequestParams($uri, $route[$uri], $route[$uri]['asArray']);
+            $method = (substr($uri, -1) == '/') ? 'index' : substr($uri, strrpos($uri, '/'));
+            if (substr($method, 0, 1) == '/') {
+                $method = substr($method, 1);
+            }
             $this->result = call_user_func_array($this->getCallable($route[$uri]['action'], $method), $params);
         // Else, trigger the error action
         } else {
@@ -1030,10 +1033,6 @@ class Project
      */
     protected function getUri($uri)
     {
-        //if (substr_count($uri, '/') > 1) {
-        //    $uri = substr($uri, 1);
-        //    $uri = '/' . substr($uri, 0, strpos($uri, '/'));
-        //}
         // If URI has params
         if (strpos($uri, '/:') !== false) {
             $uri = substr($uri, 0, strpos($uri, '/:'));
@@ -1071,10 +1070,19 @@ class Project
     protected function getUriMatch($uri, $route)
     {
         $match = null;
-        foreach ($route as $key => $value) {
-            if (($key != '/') && ($uri != '/')) {
-                if (substr($uri, 0, strlen($key)) == $key) {
-                    $match = $key;
+
+        // If root, see if there's an exact match
+        if ($uri == '/') {
+            if (isset($route[$uri])) {
+                $match = $uri;
+            }
+        // Else, scan for a match
+        } else {
+            foreach ($route as $key => $value) {
+                if ($key != '/') {
+                    if (substr($uri, 0, strlen($key)) == $key) {
+                        $match = $key;
+                    }
                 }
             }
         }
@@ -1084,16 +1092,22 @@ class Project
     /**
      * Method to get the URI parameters
      *
+     * @param  string  $uri
      * @param  array   $route
      * @param  boolean $asArray
      * @return array
      */
-    protected function getRequestParams($route, $asArray = false)
+    protected function getRequestParams($uri, $route, $asArray = false)
     {
         $requestParams = array();
         $params = $this->request->getPath();
+        $stems = explode('/', $uri);
 
-        unset($params[0]);
+        foreach ($stems as $stem) {
+            if (($stem != '') && (in_array($stem, $params))) {
+                unset($params[array_search($stem, $params)]);
+            }
+        }
 
         // Handle trailing slash (last position empty)
         if (empty($params[count($params)])) {

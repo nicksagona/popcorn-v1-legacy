@@ -5,6 +5,20 @@ require_once '../vendor/Popcorn/src/Pop/Pop.php';
 try {
     $pop = new Pop\Pop();
 
+    class AdminController extends Pop\Mvc\Controller
+    {
+        public function index()
+        {
+            echo 'This is the index() method of the AdminController<br />' . PHP_EOL;
+        }
+
+        public function foo($user)
+        {
+            echo 'This is the foo() method of the AdminController<br />' . PHP_EOL;
+            print_r($user);
+        }
+    }
+
     // Set the URI mapping to strict
     //$pop->setStrict(true);
 
@@ -28,6 +42,12 @@ try {
     $pop->get('/list/:name*', function($user) {
         print_r($user);
     });
+
+    // Wildcard example, returns numeric array of URI segments
+    $pop->get('/admin/', 'AdminController');
+
+    // Wildcard example, returns numeric array of URI segments
+    $pop->get('/admin/foo/:name*', 'AdminController');
 
     // POST example
     $pop->post('/edit/:id', function($id) {
