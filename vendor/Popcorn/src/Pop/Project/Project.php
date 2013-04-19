@@ -724,7 +724,8 @@ class Project
         // If the result is a model object, send it to the view object and send response
         if ((null !== $this->result) && ($this->result instanceof \Pop\Mvc\Model)) {
             if ($this->response->getCode() == 200) {
-                $viewFile = ($uri == '/') ? '/index.phtml' : $uri . '.phtml';
+                //$viewFile = ($uri == '/') ? '/index.phtml' : $uri . '.phtml';
+                $viewFile = (substr($uri, -1) == '/') ? $uri . 'index.phtml' : $uri . '.phtml';
             } else {
                 $viewFile = '/error.phtml';
             }

@@ -4,18 +4,20 @@ require_once '../vendor/Popcorn/src/Pop/Pop.php';
 
 try {
     $pop = new Pop\Pop();
-
+    $pop->setViewPath('./view');
     class AdminController extends Pop\Mvc\Controller
     {
         public function index()
         {
-            echo 'This is the index() method of the AdminController<br />' . PHP_EOL;
+            //echo 'This is the index() method of the AdminController<br />' . PHP_EOL;
+            return new Pop\Mvc\Model(array('title' => 'This is the index() method of the AdminController'));
         }
 
-        public function foo($user)
+        public function foo()
         {
-            echo 'This is the foo() method of the AdminController<br />' . PHP_EOL;
-            print_r($user);
+            //echo 'This is the foo() method of the AdminController<br />' . PHP_EOL;
+            //print_r($user);
+            return new Pop\Mvc\Model(array('title' => 'This is the foo() method of the AdminController'));
         }
     }
 
