@@ -698,7 +698,7 @@ class Project
 
         // If the request and parameters are valid, call the assigned action
         if ($this->isValidRequest($uri) &&
-            $this->isValidParams($route[$uri]['params'], $params) &&
+            $this->isValidParams($uri, $route[$uri]['params'], $params) &&
             (count($params) == count($route[$uri]['params']))) {
             $params = $this->getRequestParams($uri, $route[$uri], $route[$uri]['asArray']);
             $method = (substr($uri, -1) == '/') ? 'index' : substr($uri, strrpos($uri, '/'));
@@ -1071,7 +1071,6 @@ class Project
     protected function getUriMatch($uri, $route)
     {
         $match = null;
-
         // If root, see if there's an exact match
         if ($uri == '/') {
             if (isset($route[$uri])) {
@@ -1153,25 +1152,36 @@ class Project
     /**
      * Method to determine a valid parameters in strict mode
      *
+     * @param  string  $uri
      * @param  array $routeParams
      * @param  array $uriParams
      * @return boolean
      */
-    protected function isValidParams($routeParams, $uriParams)
+    protected function isValidParams($uri, $routeParams, $uriParams)
     {
         $result = true;
+        $isArray = false;
 
         if ($this->strict) {
             $requestParams = $this->request->getPath();
-            unset($requestParams[0]);
+            $stems = explode('/', $uri);
+            foreach ($stems as $stem) {
+                if (($stem != '') && (in_array($stem, $requestParams))) {
+                    unset($requestParams[array_search($stem, $requestParams)]);
+                }
+            }
 
             // Handle trailing slash (last position empty)
             if (empty($requestParams[count($requestParams)])) {
                 unset($requestParams[count($requestParams)]);
             }
 
+
             // If any parameter value is not set, null or empty, set to false
             foreach ($routeParams as $param) {
+                if (is_array($uriParams[$param])) {
+                    $isArray = true;
+                }
                 if (is_array($uriParams[$param]) && (in_array(null, $uriParams[$param]))) {
                     $result = false;
                 } else if (!isset($uriParams[$param]) || empty($uriParams[$param])) {
@@ -1181,7 +1191,7 @@ class Project
 
             // If the number of requested parameters do not match
             // the expected routed parameters, set to false
-            if (count($requestParams) != count($routeParams)) {
+            if ((!$isArray) && (count($requestParams) != count($routeParams))) {
                 $result = false;
             }
         }
