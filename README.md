@@ -1,10 +1,10 @@
-Popcorn Micro-Framework v1.1.1
+Popcorn Micro-Framework v1.2.0
 ==============================
 
 RELEASE INFORMATION
 -------------------
-Popcorn Micro-Framework 1.1.1 Release  
-Released February 25, 2013
+Popcorn Micro-Framework 1.2.0 Release
+Released April 23, 2013
 
 OVERVIEW
 --------
@@ -26,6 +26,7 @@ FEATURES
     - via associative array of values
     - via numeric array of values
 * Wildcard support
+* Error handling
 * Event handling
 * Service management
 * Basic web support, such as sessions, cookies, mobile detection, etc.

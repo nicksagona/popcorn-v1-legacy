@@ -23,7 +23,7 @@ namespace Pop\Project;
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
  * @license    https://raw.github.com/nicksagona/Popcorn/master/LICENSE.TXT     New BSD License
- * @version    1.1.1
+ * @version    1.2.0
  */
 class Project
 {
@@ -31,7 +31,7 @@ class Project
     /**
      * Current version
      */
-    const VERSION = '1.1.1';
+    const VERSION = '1.2.0';
 
     /**
      * Current URL
@@ -94,7 +94,7 @@ class Project
         'options' => array(),
         'connect' => array(),
         'patch'   => array(),
-        'error'   => null
+        'error'   => array()
     );
 
     /**
@@ -477,11 +477,12 @@ class Project
      * Add an action to the ERROR route
      *
      * @param  mixed $action
+     * @param  string $root
      * @return \Pop\Pop
      */
-    public function error($action)
+    public function error($action, $root = '/')
     {
-        $this->routes['error'] = $action;
+        $this->routes['error'][$root] = $action;
         return $this;
     }
 
@@ -708,11 +709,13 @@ class Project
             $this->result = call_user_func_array($this->getCallable($route[$uri]['action'], $method), $params);
         // Else, trigger the error action
         } else {
-            if (null !== $this->routes['error']) {
+            $error = $this->getErrorMatch($this->request->getRequestUri());
+            if (isset($this->routes['error'][$error])) {
                 if (!headers_sent()) {
+                    $this->response->setCode(404);
                     $this->response->sendHeaders();
                 }
-                $this->result = call_user_func_array($this->getCallable($this->routes['error'], 'error'), array());
+                $this->result = call_user_func_array($this->getCallable($this->routes['error'][$error], 'error'), array());
             } else {
                 throw new \Pop\Exception('Error: No error action has been defined to handle errors.');
             }
@@ -724,7 +727,6 @@ class Project
         // If the result is a model object, send it to the view object and send response
         if ((null !== $this->result) && ($this->result instanceof \Pop\Mvc\Model)) {
             if ($this->response->getCode() == 200) {
-                //$viewFile = ($uri == '/') ? '/index.phtml' : $uri . '.phtml';
                 $viewFile = (substr($uri, -1) == '/') ? $uri . 'index.phtml' : $uri . '.phtml';
             } else {
                 $viewFile = '/error.phtml';
@@ -1086,6 +1088,49 @@ class Project
                 }
             }
         }
+
+        // If still no match, try with a trailing slash if there is none
+        if ((null === $match) && (substr($uri, -1) != '/')) {
+            if (isset($route[$uri . '/'])) {
+                $match = $uri . '/';
+            }
+        }
+
+        return $match;
+    }
+
+    /**
+     * Method to match the requested URI to a error route
+     *
+     * @param  string $uri
+     * @return string
+     */
+    protected function getErrorMatch($uri)
+    {
+        $match = '/';
+        // If root, see if there's an exact match
+        if ($uri == '/') {
+            if (isset($this->routes['error'][$uri])) {
+                $match = $uri;
+            }
+        // Else, scan for a match
+        } else {
+            foreach ($this->routes['error'] as $key => $value) {
+                if ($key != '/') {
+                    if (substr($uri, 0, strlen($key)) == $key) {
+                        $match = $key;
+                    }
+                }
+            }
+        }
+
+        // If still no match, try with a trailing slash if there is none
+        if ((null === $match) && (substr($uri, -1) != '/')) {
+            if (isset($this->routes[$uri . '/'])) {
+                $match = $uri . '/';
+            }
+        }
+
         return $match;
     }
 

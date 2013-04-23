@@ -1,25 +1,9 @@
 <?php
 
-require_once '../vendor/Popcorn/src/Pop/Pop.php';
+require_once __DIR__ . '/../vendor/Popcorn/src/Pop/Pop.php';
 
 try {
     $pop = new Pop\Pop();
-    $pop->setViewPath('./view');
-    class AdminController extends Pop\Mvc\Controller
-    {
-        public function index()
-        {
-            //echo 'This is the index() method of the AdminController<br />' . PHP_EOL;
-            return new Pop\Mvc\Model(array('title' => 'This is the index() method of the AdminController'));
-        }
-
-        public function foo()
-        {
-            //echo 'This is the foo() method of the AdminController<br />' . PHP_EOL;
-            //print_r($user);
-            return new Pop\Mvc\Model(array('title' => 'This is the foo() method of the AdminController'));
-        }
-    }
 
     // Set the URI mapping to strict
     //$pop->setStrict(true);
@@ -27,7 +11,6 @@ try {
     /**
      * Basic routing using closures
      */
-
     $pop->get('/', function() { echo 'Hello, World!' . PHP_EOL; });
 
     // Direct variable mapping example, map values to variables $fname, $lname
@@ -44,12 +27,6 @@ try {
     $pop->get('/list/:name*', function($user) {
         print_r($user);
     });
-
-    // Wildcard example, returns numeric array of URI segments
-    $pop->get('/admin/', 'AdminController');
-
-    // Wildcard example, returns numeric array of URI segments
-    $pop->get('/admin/foo/:name*', 'AdminController');
 
     // POST example
     $pop->post('/edit/:id', function($id) {
