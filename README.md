@@ -1,10 +1,10 @@
-Popcorn Micro-Framework v1.2.0
+Popcorn Micro-Framework v1.2.1
 ==============================
 
 RELEASE INFORMATION
 -------------------
-Popcorn Micro-Framework 1.2.0 Release  
-Released April 23, 2013
+Popcorn Micro-Framework 1.2.1 Release  
+Released May 31, 2013
 
 OVERVIEW
 --------

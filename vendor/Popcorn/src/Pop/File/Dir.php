@@ -23,7 +23,7 @@ namespace Pop\File;
  * @author     Nick Sagona, III <nick@popphp.org>
  * @copyright  Copyright (c) 2009-2013 Moc 10 Media, LLC. (http://www.moc10media.com)
  * @license    http://www.popphp.org/license     New BSD License
- * @version    1.2.3
+ * @version    1.3.0
  */
 class Dir
 {
@@ -39,6 +39,18 @@ class Dir
      * @var array
      */
     protected $files = array();
+
+    /**
+     * The files within the directory as objects
+     * @var array
+     */
+    protected $objects = array();
+
+    /**
+     * The nested tree map of the directory and its files
+     * @var array
+     */
+    protected $tree = array();
 
     /**
      * Flag to store the full path.
@@ -76,6 +88,7 @@ class Dir
         if (!file_exists(dirname($dir))) {
             throw new Exception('Error: The directory does not exist.');
         }
+        $this->tree[realpath($dir)] = $this->buildTree(new \DirectoryIterator($dir));
         $this->full = $full;
         $this->rec = $rec;
         $this->dirs = $dirs;
@@ -101,17 +114,24 @@ class Dir
                 if (($fileInfo->getFilename() != '.') && ($fileInfo->getFilename() != '..')) {
                     // If full path flag was passed, store the full path.
                     if ($this->full) {
+                        $f = null;
                         if ($this->dirs) {
-                            $this->files[] = ($fileInfo->isDir()) ? (realpath($fileInfo->getPathname())) : realpath($fileInfo->getPathname());
+                            $f = ($fileInfo->isDir()) ? (realpath($fileInfo->getPathname())) : realpath($fileInfo->getPathname());
                         } else if (!$fileInfo->isDir()) {
-                            $this->files[] = realpath($fileInfo->getPathname());
+                            $f = realpath($fileInfo->getPathname());
+                        }
+                        if (null !== $f) {
+                            $this->files[] = $f;
+                            $this->objects[] = $f;
                         }
                     // Else, store only the directory or file name.
                     } else {
                         if ($this->dirs) {
                             $this->files[] = ($fileInfo->isDir()) ? ($fileInfo->getFilename()) : $fileInfo->getFilename();
+                            $this->objects[] = ($fileInfo->isDir()) ? (realpath($fileInfo->getPathname())) : realpath($fileInfo->getPathname());
                         } else if (!$fileInfo->isDir()) {
                             $this->files[] = $fileInfo->getFilename();
+                            $this->objects[] = realpath($fileInfo->getPathname());
                         }
                     }
                 }
@@ -123,21 +143,45 @@ class Dir
                     // If full path flag was passed, store the full path.
                     if ($this->full) {
                         if ($this->dirs) {
-                            $this->files[] = ($fileInfo->isDir()) ? ($this->path . DIRECTORY_SEPARATOR . $fileInfo->getFilename() . DIRECTORY_SEPARATOR) : ($this->path . DIRECTORY_SEPARATOR . $fileInfo->getFilename());
+                            $f = ($fileInfo->isDir()) ? ($this->path . DIRECTORY_SEPARATOR . $fileInfo->getFilename() . DIRECTORY_SEPARATOR) : ($this->path . DIRECTORY_SEPARATOR . $fileInfo->getFilename());
                         } else if (!$fileInfo->isDir()) {
-                            $this->files[] = $this->path . DIRECTORY_SEPARATOR . $fileInfo->getFilename();
+                            $f = $this->path . DIRECTORY_SEPARATOR . $fileInfo->getFilename();
                         }
+                        $this->files[] = $f;
+                        $this->objects[] = $f;
                     // Else, store only the directory or file name.
                     } else {
                         if ($this->dirs) {
                             $this->files[] = ($fileInfo->isDir()) ? ($fileInfo->getFilename()) : $fileInfo->getFilename();
+                            $this->objects[] = ($fileInfo->isDir()) ? ($this->path . DIRECTORY_SEPARATOR . $fileInfo->getFilename() . DIRECTORY_SEPARATOR) : ($this->path . DIRECTORY_SEPARATOR . $fileInfo->getFilename());
                         } else if (!$fileInfo->isDir()) {
                             $this->files[] = $fileInfo->getFilename();
+                            $this->objects[] = $this->path . DIRECTORY_SEPARATOR . $fileInfo->getFilename();
                         }
                     }
                 }
             }
         }
+    }
+
+    /**
+     * Is dir object.
+     *
+     * @return boolean
+     */
+    public function isDir()
+    {
+        return true;
+    }
+
+    /**
+     * Is file object.
+     *
+     * @return boolean
+     */
+    public function isFile()
+    {
+        return false;
     }
 
     /**
@@ -190,6 +234,36 @@ class Dir
     public function getFiles()
     {
         return $this->files;
+    }
+
+    /**
+     * Get the files as objects.
+     *
+     * @return array
+     */
+    public function getObjects()
+    {
+        if (isset($this->objects[0]) && is_string($this->objects[0])) {
+            $objects = array();
+
+            foreach ($this->objects as $object) {
+                $objects[] = (is_dir($object)) ? new self($object, true, true) : new File($object, array());
+            }
+
+            $this->objects = $objects;
+        }
+
+        return $this->objects;
+    }
+
+    /**
+     * Get the tree.
+     *
+     * @return array
+     */
+    public function getTree()
+    {
+        return $this->tree;
     }
 
     /**
@@ -308,6 +382,34 @@ class Dir
         if ($del) {
             @rmdir($path);
         }
+    }
+
+    /**
+     * Empty an entire directory.
+     *
+     * @param  \DirectoryIterator  $it
+     * @return array
+     */
+    protected function buildTree(\DirectoryIterator $it)
+    {
+        $result = array();
+
+        foreach ($it as $key => $child) {
+            if ($child->isDot()) {
+                continue;
+            }
+
+            $name = $child->getBasename();
+
+            if ($child->isDir()) {
+                $subit = new \DirectoryIterator($child->getPathname());
+                $result[DIRECTORY_SEPARATOR . $name] = $this->buildTree($subit);
+            } else {
+                $result[] = $name;
+            }
+        }
+
+        return $result;
     }
 
 }
