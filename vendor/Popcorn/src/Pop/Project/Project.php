@@ -692,58 +692,67 @@ class Project
         // Trigger any pre-route events
         $this->events->trigger('route.pre', array('project' => $this));
 
-        // Get params for the route
-        if (isset($route[$uri])) {
-            $params = $this->getRequestParams($uri, $route[$uri]);
-        }
-
-        // If the request and parameters are valid, call the assigned action
-        if ($this->isValidRequest($uri) &&
-            $this->isValidParams($uri, $route[$uri]['params'], $params) &&
-            (count($params) == count($route[$uri]['params']))) {
-            $params = $this->getRequestParams($uri, $route[$uri], $route[$uri]['asArray']);
-            $method = (substr($uri, -1) == '/') ? 'index' : substr($uri, strrpos($uri, '/'));
-            if (substr($method, 0, 1) == '/') {
-                $method = substr($method, 1);
+        // If still alive after 'route.pre'
+        if ($this->events->alive()) {
+            // Get params for the route
+            if (isset($route[$uri])) {
+                $params = $this->getRequestParams($uri, $route[$uri]);
             }
-            $this->result = call_user_func_array($this->getCallable($route[$uri]['action'], $method), $params);
-        // Else, trigger the error action
-        } else {
-            $error = $this->getErrorMatch($this->request->getRequestUri());
-            if (isset($this->routes['error'][$error])) {
-                if (!headers_sent()) {
-                    $this->response->setCode(404);
-                    $this->response->sendHeaders();
+
+            // If the request and parameters are valid, call the assigned action
+            if ($this->isValidRequest($uri) &&
+                $this->isValidParams($uri, $route[$uri]['params'], $params) &&
+                (count($params) == count($route[$uri]['params']))) {
+                $params = $this->getRequestParams($uri, $route[$uri], $route[$uri]['asArray']);
+                $method = (substr($uri, -1) == '/') ? 'index' : substr($uri, strrpos($uri, '/'));
+                if (substr($method, 0, 1) == '/') {
+                    $method = substr($method, 1);
                 }
-                $this->result = call_user_func_array($this->getCallable($this->routes['error'][$error], 'error'), array());
+                $this->result = call_user_func_array($this->getCallable($route[$uri]['action'], $method), $params);
+            // Else, trigger the error action
             } else {
-                throw new \Pop\Exception('Error: No error action has been defined to handle errors.');
-            }
-        }
-
-        // Trigger any post-route events
-        $this->events->trigger('route.post', array('project' => $this));
-
-        // If the result is a model object, send it to the view object and send response
-        if ((null !== $this->result) && ($this->result instanceof \Pop\Mvc\Model)) {
-            if ($this->response->getCode() == 200) {
-                $viewFile = (substr($uri, -1) == '/') ? $uri . 'index.phtml' : $uri . '.phtml';
-            } else {
-                $viewFile = '/error.phtml';
+                $error = $this->getErrorMatch($this->request->getRequestUri());
+                if (isset($this->routes['error'][$error])) {
+                    if (!headers_sent()) {
+                        $this->response->setCode(404);
+                        $this->response->sendHeaders();
+                    }
+                    $this->result = call_user_func_array($this->getCallable($this->routes['error'][$error], 'error'), array());
+                } else {
+                    throw new \Pop\Exception('Error: No error action has been defined to handle errors.');
+                }
             }
 
-            // Create the view object
-            $this->view = \Pop\Mvc\View::factory($this->viewPath . $viewFile, $this->result);
+            // Trigger any post-route events
+            $this->events->trigger('route.post', array('project' => $this));
 
-            // Trigger any pre-dispatch events
-            $this->events->trigger('dispatch.pre', array('project' => $this));
+            // If still alive after 'route.post'
+            if ($this->events->alive()) {
+                // If the result is a model object, send it to the view object and send response
+                if ((null !== $this->result) && ($this->result instanceof \Pop\Mvc\Model)) {
+                    if ($this->response->getCode() == 200) {
+                        $viewFile = (substr($uri, -1) == '/') ? $uri . 'index.phtml' : $uri . '.phtml';
+                    } else {
+                        $viewFile = '/error.phtml';
+                    }
 
-            // Set the response body and send the response
-            $this->response->setBody($this->view->render(true));
-            $this->response->send();
+                    // Create the view object
+                    $this->view = \Pop\Mvc\View::factory($this->viewPath . $viewFile, $this->result);
 
-            // Trigger any post-dispatch events
-            $this->events->trigger('dispatch.post', array('project' => $this));
+                    // Trigger any pre-dispatch events
+                    $this->events->trigger('dispatch.pre', array('project' => $this));
+
+                    // If still alive after 'dispatch.pre'
+                    if ($this->events->alive()) {
+                        // Set the response body and send the response
+                        $this->response->setBody($this->view->render(true));
+                        $this->response->send();
+
+                        // Trigger any post-dispatch events
+                        $this->events->trigger('dispatch.post', array('project' => $this));
+                    }
+                }
+            }
         }
     }
 
