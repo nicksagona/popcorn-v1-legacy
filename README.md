@@ -1,10 +1,10 @@
-Popcorn Micro-Framework v1.2.2
+Popcorn Micro-Framework v1.2.3
 ==============================
 
 RELEASE INFORMATION
 -------------------
-Popcorn Micro-Framework 1.2.2 Release  
-Released July 15, 2013
+Popcorn Micro-Framework 1.2.3 Release  
+Released September 9, 2013
 
 OVERVIEW
 --------
@@ -21,7 +21,7 @@ FEATURES
 --------
 * Routing URLs to functions or class/method combinations
 * Support for standard HTTP methods
-* URL segment to parameter mapping 
+* URL segment to parameter mapping
     - via direct variables
     - via associative array of values
     - via numeric array of values
