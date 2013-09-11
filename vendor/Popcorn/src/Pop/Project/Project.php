@@ -534,6 +534,8 @@ class Project
      *
      *   route.pre
      *   route.post
+     *   dispatch
+     *   dispatch.send
      *   dispatch.pre
      *   dispatch.post
      *
@@ -554,6 +556,8 @@ class Project
      *   route.pre
      *   route.post
      *   dispatch.pre
+     *   dispatch
+     *   dispatch.send
      *   dispatch.post
      *
      * @param  string $name
