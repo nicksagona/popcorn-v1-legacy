@@ -3,6 +3,21 @@
 require_once __DIR__ . '/../vendor/Popcorn/src/Pop/Pop.php';
 
 try {
+    /* If you need a database (requires the Db component to be installed)
+    $config = array(
+        'db' => array(
+            'adapter'  => 'Pdo',
+            'type'     => 'mysql',
+            'database' => 'helloworld',
+            'host'     => 'localhost',
+            'username' => 'hello',
+            'password' => '12world34'
+        )
+    );
+    $pop = new Pop\Pop($config);
+    */
+
+    // Else, pop some Popcorn
     $pop = new Pop\Pop();
 
     // Set the URI mapping to strict

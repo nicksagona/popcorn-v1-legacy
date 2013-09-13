@@ -130,6 +130,7 @@ class Project
         'list',
         'install',
         'remove',
+        'build',
         'version'
     );
 
@@ -168,6 +169,16 @@ class Project
         $this->events = new \Pop\Event\Manager();
         $this->services = new \Pop\Service\Locator();
         $this->config = new \Pop\Config($config, $changes);
+
+        if (isset($this->config->db) && class_exists('Pop\Db\Db')) {
+            \Pop\Db\Record::setDb(\Pop\Db\Db::factory($this->config->db->adapter, array (
+                'type'     => $this->config->db->type,
+                'database' => $this->config->db->database,
+                'host'     => $this->config->db->host,
+                'username' => $this->config->db->username,
+                'password' => $this->config->db->password
+            )));
+        }
     }
 
     /**
@@ -855,6 +866,7 @@ class Project
                     echo "  help\t\t\tDisplay this help" . PHP_EOL;
                     echo "  version\t\tDisplay the version" . PHP_EOL;
                     echo "  list\t\t\tList available components" . PHP_EOL;
+                    echo "  build module.php\tBuild a quick module scaffolding" . PHP_EOL;
                     echo "  install Comp1 Comp2\tInstall components" . PHP_EOL;
                     echo "  install all\t\tInstall all components" . PHP_EOL;
                     echo "  remove Comp1 Comp2\tRemove components" . PHP_EOL;
@@ -871,6 +883,136 @@ class Project
                         echo $prefix . $comp . PHP_EOL;
                     }
                     echo PHP_EOL;
+                    break;
+
+                // Build module scaffolding
+                case 'build':
+                    if (!isset($parameters[0])) {
+                        throw new \Pop\Exception('You must pass a config file.');
+                    }
+                    if (!file_exists($parameters[0])) {
+                        throw new \Pop\Exception('The config file does not exist.');
+                    }
+
+                    $config = include $parameters[0];
+
+                    foreach ($config as $name => $cfg) {
+                        echo PHP_EOL . 'Creating folder structure for ' . $name . '...' . PHP_EOL;
+                        if (!file_exists(__DIR__ . '/../../../../../module')) {
+                            mkdir(__DIR__ . '/../../../../../module');
+                        }
+                        if (!file_exists(__DIR__ . '/../../../../../module/' . $name)) {
+                            mkdir(__DIR__ . '/../../../../../module/' . $name);
+                            mkdir(__DIR__ . '/../../../../../module/' . $name . '/data');
+                            mkdir(__DIR__ . '/../../../../../module/' . $name . '/src');
+                            mkdir(__DIR__ . '/../../../../../module/' . $name . '/view');
+                            mkdir(__DIR__ . '/../../../../../module/' . $name . '/src/' . $name);
+                            chmod(__DIR__ . '/../../../../../module/' . $name . '/data', 0777);
+
+                            $dir = dirname($parameters[0]);
+                            if (file_exists($dir . '/view')) {
+                                echo PHP_EOL . 'Copying view files...';
+                                $d = new \Pop\File\Dir($dir . '/view', false, false, false);
+                                foreach ($d->getFiles() as $f) {
+                                    copy($dir . '/view/' . $f, __DIR__ . '/../../../../../module/' . $name . '/view/' . $f);
+                                }
+                            }
+                        }
+
+                        foreach ($cfg as $key => $value) {
+                            // Create database file
+                            if ($key == 'databases') {
+                                echo PHP_EOL . 'Creating database files...';
+                                if (!is_array($value)) {
+                                    $value = array($value);
+                                }
+                                foreach ($value as $val) {
+                                    if (stripos($val, 'sqlite')) {
+                                        touch(__DIR__ . '/../../../../../module/' . $name . '/data/' . $val);
+                                        chmod(__DIR__ . '/../../../../../module/' . $name . '/data/' . $val, 0777);
+                                    }
+                                }
+                            }
+                            // Create controller classes
+                            if ($key == 'controllers') {
+                                echo PHP_EOL . 'Creating controller classes...';
+                                if (!is_array($value)) {
+                                    $value = array($value);
+                                }
+                                mkdir(__DIR__ . '/../../../../../module/' . $name . '/src/' . $name . '/Controller');
+                                foreach ($value as $val) {
+                                    $class = "<?php" . PHP_EOL . PHP_EOL . "namespace {$name}\\Controller;" . PHP_EOL . PHP_EOL .
+                                        "class {$val} extends \\Pop\\Mvc\\Controller " . PHP_EOL . "{" . PHP_EOL . PHP_EOL .
+                                        "    public function index()" . PHP_EOL . "    {" . PHP_EOL . PHP_EOL . "    }" . PHP_EOL . PHP_EOL .
+                                        "    public function error()" . PHP_EOL . "    {" . PHP_EOL . PHP_EOL . "    }" . PHP_EOL . PHP_EOL .
+                                        "}" . PHP_EOL . PHP_EOL;
+                                    file_put_contents(__DIR__ . '/../../../../../module/' . $name . '/src/' . $name . '/Controller/' . $val . '.php', $class);
+                                }
+                            }
+
+                            // Create table classes
+                            if ($key == 'tables') {
+                                echo PHP_EOL . 'Creating table classes...';
+                                if (!is_array($value)) {
+                                    $value = array($value);
+                                }
+                                mkdir(__DIR__ . '/../../../../../module/' . $name . '/src/' . $name . '/Table');
+                                foreach ($value as $val) {
+                                    $class = "<?php" . PHP_EOL . PHP_EOL . "namespace {$name}\\Table;" . PHP_EOL . PHP_EOL .
+                                        "class {$val} extends \\Pop\\Db\\Record { }" . PHP_EOL . PHP_EOL;
+                                    file_put_contents(__DIR__ . '/../../../../../module/' . $name . '/src/' . $name . '/Table/' . $val . '.php', $class);
+                                }
+                            }
+
+                            // Create model classes
+                            if ($key == 'models') {
+                                echo PHP_EOL . 'Creating model classes...';
+                                if (!is_array($value)) {
+                                    $value = array($value);
+                                }
+                                mkdir(__DIR__ . '/../../../../../module/' . $name . '/src/' . $name . '/Model');
+                                foreach ($value as $val) {
+                                    $class = "<?php" . PHP_EOL . PHP_EOL . "namespace {$name}\\Model;" . PHP_EOL . PHP_EOL .
+                                        "class {$val} extends \\Pop\\Mvc\\Model { }" . PHP_EOL . PHP_EOL;
+                                    file_put_contents(__DIR__ . '/../../../../../module/' . $name . '/src/' . $name . '/Model/' . $val . '.php', $class);
+                                }
+                            }
+
+                            // Create form classes
+                            if ($key == 'forms') {
+                                echo PHP_EOL . 'Creating form classes...';
+                                if (!is_array($value)) {
+                                    $value = array($value);
+                                }
+                                mkdir(__DIR__ . '/../../../../../module/' . $name . '/src/' . $name . '/Form');
+                                foreach ($value as $val) {
+                                    $class = "<?php" . PHP_EOL . PHP_EOL . "namespace {$name}\\Form;" . PHP_EOL . PHP_EOL .
+                                        "class {$val} extends \\Pop\\Form\\Form" . PHP_EOL . "{" . PHP_EOL . PHP_EOL .
+                                        "    public function __construct(\$action = null, \$method = 'post', array \$fields = null, \$indent = null)" . PHP_EOL .
+                                        "    {" . PHP_EOL .
+                                        "        \$this->initFieldsValues = array(" . PHP_EOL .
+                                        "            'field' => array(" . PHP_EOL .
+                                        "                'type'       => 'text'," . PHP_EOL .
+                                        "                'label'      => 'Field:'," . PHP_EOL .
+                                        "                'required'   => true," . PHP_EOL .
+                                        "                'attributes' => array('size' => 40)" . PHP_EOL .
+                                        "            ),"  . PHP_EOL .
+                                        "            'submit' => array(" . PHP_EOL .
+                                        "                'type'  => 'submit'," . PHP_EOL .
+                                        "                'label' => '&nbsp;'," . PHP_EOL .
+                                        "                'value' => 'Submit'" . PHP_EOL .
+                                        "            )"  . PHP_EOL .
+                                        "        );" . PHP_EOL .
+                                        "        parent::__construct(\$action, \$method, \$fields, \$indent);" . PHP_EOL .
+                                        "    }" . PHP_EOL . PHP_EOL .
+                                        "}" . PHP_EOL . PHP_EOL;
+                                    file_put_contents(__DIR__ . '/../../../../../module/' . $name . '/src/' . $name . '/Form/' . $val . '.php', $class);
+                                }
+                            }
+                        }
+                        echo PHP_EOL . PHP_EOL . 'Structure for ' . $name . ' complete.' . PHP_EOL . PHP_EOL;
+                    }
+
                     break;
 
                 // Install components
