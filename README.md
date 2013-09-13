@@ -1,10 +1,10 @@
-Popcorn Micro-Framework v1.2.3
+Popcorn Micro-Framework v1.3.0
 ==============================
 
 RELEASE INFORMATION
 -------------------
-Popcorn Micro-Framework 1.2.3 Release  
-Released September 9, 2013
+Popcorn Micro-Framework 1.3.0 Release  
+Released September 12, 2013
 
 OVERVIEW
 --------
@@ -34,6 +34,7 @@ FEATURES
 * Autoloading and support for registering other libraries of code
 * Package manager for installing or removing compatible components from the Pop PHP Framework
     - requires the TAR or ZIP programs to be installed
+* Quick module code scaffolding
 
 DOCUMENTATION
 -------------
@@ -55,6 +56,22 @@ You'll need this at the top of your main script:
         echo 'Hello, ' . ucfirst($fname) . ' ' . ucfirst($lname) . '!' . PHP_EOL;
     });
 
+    $pop->run();
+
+### A Simple Example with a Database (requires the Db component to be installed)
+    $pop = new Pop\Pop(array(
+        'db' => array(
+            'adapter'  => 'Pdo',
+            'type'     => 'mysql',
+            'database' => 'helloworld',
+            'host'     => 'localhost',
+            'username' => 'hello',
+            'password' => '12world34'
+        )
+    ));
+
+    // A database object will be created and set, available for use by the application
+    $pop->get('/', function() { echo 'Hello World!; });
     $pop->run();
 
 ### An Array Example
