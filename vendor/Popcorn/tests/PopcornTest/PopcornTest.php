@@ -498,5 +498,47 @@ class PopcornTest extends \PHPUnit_Framework_TestCase
         $this->assertContains('Skipping', $output);
     }
 
+    public function testCliBuild()
+    {
+        $pop = new \Pop\Pop();
+        ob_start();
+        $pop->cli(array(
+            '/home/nick/Projects/Popcorn/script/pop.php',
+            '.tar.gz',
+            'build',
+            '/home/nick/Projects/Popcorn/script/test/module.install.php'
+        ));
+        $output = ob_get_contents();
+        ob_end_clean();
+        $this->assertContains('Creating', $output);
+        if (file_exists('/home/nick/Projects/Popcorn/module')) {
+            $dir = new \Pop\File\Dir('/home/nick/Projects/Popcorn/module');
+            $dir->emptyDir(null, true);
+        }
+    }
+
+    public function testCliBuildNoParameterException()
+    {
+        $this->setExpectedException('Pop\Exception');
+        $pop = new \Pop\Pop();
+        $pop->cli(array(
+            '/home/nick/Projects/Popcorn/script/pop.php',
+            '.tar.gz',
+            'build'
+        ));
+    }
+
+    public function testCliBuildBadParameterException()
+    {
+        $this->setExpectedException('Pop\Exception');
+        $pop = new \Pop\Pop();
+        $pop->cli(array(
+            '/home/nick/Projects/Popcorn/script/pop.php',
+            '.tar.gz',
+            'build',
+            'BadParam'
+        ));
+    }
+
 }
 
