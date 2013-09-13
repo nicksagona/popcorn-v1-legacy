@@ -534,9 +534,9 @@ class Project
      *
      *   route.pre
      *   route.post
+     *   dispatch.pre
      *   dispatch
      *   dispatch.send
-     *   dispatch.pre
      *   dispatch.post
      *
      * @param  string $name
@@ -750,6 +750,7 @@ class Project
                     if ($this->events->alive()) {
                         // Set the response body and send the response
                         $this->response->setBody($this->view->render(true));
+                        $this->events->trigger('dispatch', array('project' => $this));
                         $this->response->send();
 
                         // Trigger any post-dispatch events
