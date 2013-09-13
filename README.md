@@ -58,7 +58,7 @@ You'll need this at the top of your main script:
 
     $pop->run();
 
-### A Simple Example with a Database (requires the Db component to be installed)
+### A Simple Example with a Database (requires the Db component)
     $pop = new Pop\Pop(array(
         'db' => array(
             'adapter'  => 'Pdo',
