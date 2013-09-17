@@ -168,17 +168,33 @@ class Project
         $this->response = new \Pop\Http\Response();
         $this->events = new \Pop\Event\Manager();
         $this->services = new \Pop\Service\Locator();
-        $this->config = new \Pop\Config($config, $changes);
 
-        if (isset($this->config->db) && class_exists('Pop\Db\Db')) {
-            \Pop\Db\Record::setDb(\Pop\Db\Db::factory($this->config->db->adapter, array (
-                'type'     => $this->config->db->type,
-                'database' => $this->config->db->database,
-                'host'     => $this->config->db->host,
-                'username' => $this->config->db->username,
-                'password' => $this->config->db->password
-            )));
+        // Register and code bases if passed
+        if (isset($config['register'])) {
+            foreach ($config['register'] as $name => $src) {
+                $this->register($name, $src);
+            }
+            unset($config['register']);
         }
+
+        // Create a DB object if passed
+        if (isset($config['db']) && isset($config['db']['adapter']) &&
+            isset($config['db']['database']) && class_exists('Pop\Db\Db')) {
+            $db = \Pop\Db\Db::factory($config['db']['adapter'], array(
+                'database' => $config['db']['database'],
+                'type'     => ((isset($config['db']['type'])) ? $config['db']['type'] : null),
+                'host'     => ((isset($config['db']['host'])) ? $config['db']['host'] : null),
+                'username' => ((isset($config['db']['username'])) ? $config['db']['username'] : null),
+                'password' => ((isset($config['db']['password'])) ? $config['db']['password'] : null)
+            ));
+            $config['db'] = $db;
+            \Pop\Db\Record::setDb($db);
+        } else if (isset($config['db'])) {
+            unset($config['db']);
+        }
+
+        // Create config object
+        $this->config = new \Pop\Config($config, $changes);
     }
 
     /**
