@@ -61,6 +61,12 @@ class PopcornTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Pop\Pop', $pop);
     }
 
+    public function testRegisterWithConfig()
+    {
+        $pop = new \Pop\Pop(array('register' => array('MyApp' => __DIR__)));
+        $this->assertInstanceOf('Pop\Pop', $pop);
+    }
+
     public function testConfig()
     {
         $pop = new \Pop\Pop();
