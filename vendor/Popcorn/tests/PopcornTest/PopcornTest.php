@@ -344,16 +344,6 @@ class PopcornTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('nick (factory)', $pop->getResult());
     }
 
-    public function testWildcard()
-    {
-        global $_SERVER;
-        $_SERVER['REQUEST_URI'] = '/hello/john/t/doe';
-        $pop = new \Pop\Pop();
-        $pop->get('/hello/:name*', function($name) { return ($name); });
-        $pop->run();
-        $this->assertEquals(3, count($pop->getResult()));
-    }
-
     public function testRunError()
     {
         global $_SERVER;
