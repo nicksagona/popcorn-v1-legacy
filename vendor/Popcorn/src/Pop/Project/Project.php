@@ -975,7 +975,7 @@ class Project
                                 mkdir(__DIR__ . '/../../../../../module/' . $name . '/src/' . $name . '/Table');
                                 foreach ($value as $val) {
                                     $class = "<?php" . PHP_EOL . PHP_EOL . "namespace {$name}\\Table;" . PHP_EOL . PHP_EOL .
-                                        "class {$val} extends \\Pop\\Db\\Record { }" . PHP_EOL . PHP_EOL;
+                                        "class {$val} extends \\Pop\\Db\\Record" . PHP_EOL . "{" . PHP_EOL . PHP_EOL . "}" . PHP_EOL . PHP_EOL;
                                     file_put_contents(__DIR__ . '/../../../../../module/' . $name . '/src/' . $name . '/Table/' . $val . '.php', $class);
                                 }
                             }
