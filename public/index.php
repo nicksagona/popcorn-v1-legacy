@@ -26,6 +26,7 @@ try {
     /**
      * Basic routing using closures
      */
+
     $pop->get('/', function() { echo 'Hello, World!' . PHP_EOL; });
 
     // Direct variable mapping example, map values to variables $fname, $lname
@@ -57,9 +58,9 @@ try {
      * Basic routing based on closures returning model objects to be used with view templates
      */
     //$pop->setViewPath('./view');
-    //$pop->get('/', function() { return new Pop\Mvc\Model(array('title' => 'Hello, World!')); });
-    //$pop->get('/hello/:name*', function($name) { return new Pop\Mvc\Model(array('name' => $name)); });
-    //$pop->error(function() { return new Pop\Mvc\Model(array('error' => '404 Error: Page Not Found!')); });
+    //$pop->get('/', function() { return array('title' => 'Hello, World!'); });
+    //$pop->get('/hello/:name*', function($name) { return array('name' => $name); });
+    //$pop->error(function() { return array('error' => '404 Error: Page Not Found!'); });
 
     // Run the app
     $pop->run();

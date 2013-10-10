@@ -759,8 +759,8 @@ class Project
 
             // If still alive after 'route.post'
             if ($this->events->alive()) {
-                // If the result is a model object, send it to the view object and send response
-                if ((null !== $this->result) && ($this->result instanceof \Pop\Mvc\Model)) {
+                // If the result is an array of data, send it to the view object and send response
+                if ((null !== $this->result) && is_array($this->result)) {
                     if ($this->response->getCode() == 200) {
                         $viewFile = (substr($uri, -1) == '/') ? $uri . 'index.phtml' : $uri . '.phtml';
                     } else {
@@ -989,7 +989,7 @@ class Project
                                 mkdir(__DIR__ . '/../../../../../module/' . $name . '/src/' . $name . '/Model');
                                 foreach ($value as $val) {
                                     $class = "<?php" . PHP_EOL . PHP_EOL . "namespace {$name}\\Model;" . PHP_EOL . PHP_EOL .
-                                        "class {$val} extends \\Pop\\Mvc\\Model { }" . PHP_EOL . PHP_EOL;
+                                        "class {$val}" . PHP_EOL . "{" . PHP_EOL . PHP_EOL . "}" . PHP_EOL . PHP_EOL;
                                     file_put_contents(__DIR__ . '/../../../../../module/' . $name . '/src/' . $name . '/Model/' . $val . '.php', $class);
                                 }
                             }

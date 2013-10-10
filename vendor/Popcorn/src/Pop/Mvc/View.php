@@ -41,10 +41,10 @@ class View
     protected $templateString = null;
 
     /**
-     * Data model
-     * @var \Pop\Mvc\Model
+     * Model data
+     * @var array
      */
-    protected $model = null;
+    protected $data = null;
 
     /**
      * View output string
@@ -58,10 +58,10 @@ class View
      * Instantiate the view object.
      *
      * @param  string $template
-     * @param  mixed  $model
+     * @param  array  $data
      * @return \Pop\Mvc\View
      */
-    public function __construct($template = null, $model = null)
+    public function __construct($template = null, array $data = null)
     {
         if (null !== $template) {
             if (((substr($template, -6) == '.phtml') ||
@@ -73,35 +73,34 @@ class View
             }
         }
 
-        if (null !== $model) {
-            if (is_array($model)) {
-                $this->model = new Model($model);
-            } else if ($model instanceof Model) {
-                $this->model = $model;
-            }
-        }
+        $this->data = $data;
     }
 
     /**
      * Create a Pop\Mvc\View object
      *
      * @param  string $template
-     * @param  mixed  $model
+     * @param  array  $data
      * @return \Pop\Mvc\View
      */
-    public static function factory($template = null, $model = null)
+    public static function factory($template = null, array $data = null)
     {
-        return new self($template, $model);
+        return new self($template, $data);
     }
 
     /**
-     * Get data model
+     * Get model data
      *
-     * @return \Pop\Mvc\Model
+     * @param  string $key
+     * @return mixed
      */
-    public function getModel()
+    public function getData($key = null)
     {
-        return $this->model;
+        if (null !== $key) {
+            return (isset($this->data[$key])) ? $this->data[$key] : null;
+        } else {
+            return $this->data;
+        }
     }
 
     /**
@@ -163,14 +162,14 @@ class View
     }
 
     /**
-     * Set data model
+     * Set model data
      *
-     * @param  Model $model
+     * @param  array $data
      * @return \Pop\Mvc\View
      */
-    public function setModel(Model $model)
+    public function setData(array $data = array())
     {
-        $this->model = $model;
+        $this->data = $data;
         return $this;
     }
 
@@ -207,9 +206,8 @@ class View
      */
     protected function renderTemplateFile()
     {
-        if (null !== $this->model) {
-            $data = $this->model->asArrayObject();
-            foreach ($data as $key => $value) {
+        if (null !== $this->data) {
+            foreach ($this->data as $key => $value) {
                 ${$key} = $value;
             }
         }
@@ -228,11 +226,9 @@ class View
     {
         $this->output = $this->templateString;
 
-        if (null !== $this->model) {
-            $data = $this->model->asArrayObject();
-
+        if (null !== $this->data) {
             // Render nested arrays first
-            foreach ($data as $key => $value) {
+            foreach ($this->data as $key => $value) {
                 if (is_array($value) || ($value instanceof \ArrayObject)) {
                     $start = '[{' . $key . '}]';
                     $end = '[{/' . $key . '}]';
@@ -245,7 +241,7 @@ class View
                         $outputLoop = '';
                         $i = 0;
                         foreach ($value as $val) {
-                            if (is_array($value) || ($val instanceof \ArrayObject)) {
+                            if (is_array($val)) {
                                 $l = $loop;
                                 foreach ($val as $k => $v) {
                                     $l = str_replace('[{' . $k . '}]', $v, $l);
@@ -265,7 +261,7 @@ class View
             }
 
             // Render scalar values
-            foreach ($data as $key => $value) {
+            foreach ($this->data as $key => $value) {
                 if (!is_array($value) && !($value instanceof \ArrayObject)) {
                     $this->output = str_replace('[{' . $key . '}]', $value, $this->output);
                 }
