@@ -149,18 +149,37 @@ class Project
     );
 
     /**
+     * Flag to make the autoloader the fallback autoloader or not
+     * @var boolean
+     */
+    protected $fallback = false;
+
+    /**
+     * Flag to suppress warnings
+     * @var boolean
+     */
+    protected $suppress = true;
+
+    /**
      * Constructor
      *
      * Instantiate a Pop object
      *
      * @param  array   $config
-     * @param  boolean $changes
      * @return \Pop\Project\Project
      */
-    public function __construct(array $config = array(), $changes = false)
+    public function __construct(array $config = array())
     {
+        $changes = (isset($config['changes'])) ? (bool)$config['changes'] : false;
+        $this->suppress = (isset($config['suppress'])) ? (bool)$config['suppress'] : true;
+        $this->fallback = (isset($config['fallback'])) ? (bool)$config['fallback'] : false;
+
         // Register the autoloader
-        spl_autoload_register($this, true, true);
+        if ($this->fallback) {
+            spl_autoload_register($this, true, false);
+        } else {
+            spl_autoload_register($this, true, true);
+        }
         $this->register('Pop', __DIR__ . '/../../');
 
         // Create necessary project properties and objects
@@ -1497,7 +1516,7 @@ class Project
         // Check to see if the prefix is registered with the autoloader
         $prefix = null;
         foreach ($this->prefixes as $key => $value) {
-            if (strpos($class, $key) !== false) {
+            if (substr($class, 0, strlen($key)) == $key) {
                 $prefix = $key;
             }
         }
@@ -1507,8 +1526,17 @@ class Project
             $classFile = $this->prefixes[$prefix] . DIRECTORY_SEPARATOR . $classFile;
         }
 
-        if (!@include_once($classFile)) {
-            return;
+        // Try to include the file, else return
+        // Without error suppression
+        if (!$this->suppress) {
+            if (!include_once($classFile)) {
+                return;
+            }
+            // With error suppression
+        } else {
+            if (!@include_once($classFile)) {
+                return;
+            }
         }
     }
 
