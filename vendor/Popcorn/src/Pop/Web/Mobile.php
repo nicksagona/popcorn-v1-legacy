@@ -131,7 +131,7 @@ class Mobile
     public function __construct($mobile = null, $desktop = null, $force = 0)
     {
         // Set the user agent and object properties.
-        $this->ua = $_SERVER['HTTP_USER_AGENT'];
+        $this->ua = (isset($_SERVER['HTTP_USER_AGENT'])) ? $_SERVER['HTTP_USER_AGENT'] : null;
         $this->mobileUrl = $mobile;
         $this->desktopUrl = $desktop;
         $this->mobile = $this->detect();
