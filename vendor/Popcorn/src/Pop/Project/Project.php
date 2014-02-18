@@ -692,6 +692,36 @@ class Project
     }
 
     /**
+     * Method to get the request (shorthand alias)
+     *
+     * @return \Pop\Http\Request
+     */
+    public function request()
+    {
+        return $this->request;
+    }
+
+    /**
+     * Method to get the response (shorthand alias)
+     *
+     * @return \Pop\Http\Response
+     */
+    public function response()
+    {
+        return $this->response;
+    }
+
+    /**
+     * Method to get the view object (shorthand alias)
+     *
+     * @return \Pop\Mvc\View
+     */
+    public function view()
+    {
+        return $this->view;
+    }
+
+    /**
      * Method to get the view path
      *
      * @return string
