@@ -4,9 +4,9 @@
 #
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd -P )"
-CYG_PATH="$( which cygpath )"
-TAR="$( which tar )"
-ZIP="$( which unzip )"
+CYG_PATH="$( which cygpath 2> /dev/null )"
+TAR="$( which tar 2> /dev/null )"
+ZIP="$( which unzip 2> /dev/null )"
 EXT=
 CMD=
 
