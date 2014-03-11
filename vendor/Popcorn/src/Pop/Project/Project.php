@@ -767,7 +767,7 @@ class Project
      * @param  int    $priority
      * @return void
      */
-    public function log($message, $time = null, $priority = \Pop\Log\Logger::INFO)
+    public function log($message, $time = null, $priority = 6)
     {
         if (null !== $this->logger) {
             if (null !== $time) {
