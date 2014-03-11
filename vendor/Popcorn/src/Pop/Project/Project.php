@@ -69,6 +69,12 @@ class Project
     protected $response = null;
 
     /**
+     * Controller class of the called controller
+     * @var string
+     */
+    protected $controllerClass = null;
+
+    /**
      * View object
      * @var \Pop\Mvc\View
      */
@@ -108,6 +114,18 @@ class Project
      * @var \Pop\Service\Locator
      */
     protected $services = null;
+
+    /**
+     * Project logger
+     * @var \Pop\Log\Logger
+     */
+    protected $logger = null;
+
+    /**
+     * Project start timestamp
+     * @var int
+     */
+    protected $start = null;
 
     /**
      * Result
@@ -210,6 +228,16 @@ class Project
             \Pop\Db\Record::setDb($db);
         } else if (isset($config['db'])) {
             unset($config['db']);
+        }
+
+        if (isset($config['log']) && class_exists('Pop\Log\Logger')) {
+            if (!file_exists($config['log'])) {
+                touch($config['log']);
+                chmod($config['log'], 0777);
+            }
+            $this->logger = new \Pop\Log\Logger(new \Pop\Log\Writer\File(realpath($config['log'])));
+        } else if (isset($config['log'])) {
+            unset($config['log']);
         }
 
         // Create config object
@@ -722,6 +750,36 @@ class Project
     }
 
     /**
+     * Access the project logger
+     *
+     * @return \Pop\Log\Logger
+     */
+    public function logger()
+    {
+        return $this->logger;
+    }
+
+    /**
+     * Log the project.
+     *
+     * @param  string $message
+     * @param  int    $time
+     * @param  int    $priority
+     * @return void
+     */
+    public function log($message, $time = null, $priority = \Pop\Log\Logger::INFO)
+    {
+        if (null !== $this->logger) {
+            if (null !== $time) {
+                $end = ((stripos($message, 'send') === false) && ((stripos($message, 'kill') !== false) || (stripos($message, 'end') !== false))) ?
+                    PHP_EOL : null;
+                $message = "[" . ($time - $this->start) . " seconds]\t\t" . $message . $end;
+            }
+            $this->logger->log($priority, $message);
+        }
+    }
+
+    /**
      * Method to get the view path
      *
      * @return string
@@ -764,16 +822,40 @@ class Project
      */
     public function run()
     {
+        $this->start = time();
+
+        if (isset($_SERVER['REQUEST_METHOD'])) {
+            $session = '[' . $_SERVER['REQUEST_METHOD'] . ']';
+            if (isset($_SERVER['REMOTE_ADDR'])) {
+                $session .= ' ' . $_SERVER['REMOTE_ADDR'];
+                if (isset($_SERVER['SERVER_PORT'])) {
+                    $session .= ':' . $_SERVER['SERVER_PORT'];
+                }
+                if (isset($_SERVER['HTTP_USER_AGENT'])) {
+                    $session .= ' ' . $_SERVER['HTTP_USER_AGENT'];
+                }
+            }
+        } else {
+            $session = '[CLI]';
+        }
+
+        $this->log($session, time());
+
         // Populate necessary variables
         $route = $this->routes[strtolower($this->request->getMethod())];
         $uri = $this->getUriMatch($this->request->getRequestUri(), $route);
         $params = array();
 
         // Trigger any pre-route events
+        if (null !== $this->events->get('route.pre')) {
+            $this->log('[Event] Pre-Route', time(), \Pop\Log\Logger::NOTICE);
+        }
         $this->events->trigger('route.pre', array('project' => $this));
 
         // If still alive after 'route.pre'
         if ($this->events->alive()) {
+            $this->log('Route Start', time());
+
             // Get params for the route
             if (isset($route[$uri])) {
                 $params = $this->getRequestParams($uri, $route[$uri]);
@@ -791,6 +873,7 @@ class Project
                 $this->result = call_user_func_array($this->getCallable($route[$uri]['action'], $method), $params);
             // Else, trigger the error action
             } else {
+                $method = 'error';
                 $error = $this->getErrorMatch($this->request->getRequestUri());
                 if (isset($this->routes['error'][$error])) {
                     if (!headers_sent()) {
@@ -804,6 +887,9 @@ class Project
             }
 
             // Trigger any post-route events
+            if (null !== $this->events->get('route.post')) {
+                $this->log('[Event] Post-Route', time(), \Pop\Log\Logger::NOTICE);
+            }
             $this->events->trigger('route.post', array('project' => $this));
 
             // If still alive after 'route.post'
@@ -820,21 +906,43 @@ class Project
                     $this->view = \Pop\Mvc\View::factory($this->viewPath . $viewFile, $this->result);
 
                     // Trigger any pre-dispatch events
+                    if (null !== $this->events->get('dispatch.pre')) {
+                        $this->log('[Event] Pre-Dispatch', time(), \Pop\Log\Logger::NOTICE);
+                    }
                     $this->events->trigger('dispatch.pre', array('project' => $this));
 
                     // If still alive after 'dispatch.pre'
                     if ($this->events->alive()) {
+                        if (null !== $this->logger) {
+                            $this->log("Dispatch ['" . ((null !== $this->controllerClass) ? $this->controllerClass : 'Callable') . "']->" . $method . "\t" . $this->request->getRequestUri() . "\t" . $this->request->getFullUri(), time());
+                            $this->log("Response [" . $this->response->getCode() . "]", time());
+                        }
                         // Set the response body and send the response
                         $this->response->setBody($this->view->render(true));
+                        if (null !== $this->events->get('dispatch')) {
+                            $this->log('[Event] Dispatch', time(), \Pop\Log\Logger::NOTICE);
+                        }
                         $this->events->trigger('dispatch', array('project' => $this));
+
+                        if (null !== $this->events->get('dispatch.send')) {
+                            $this->log('[Event] Dispatch Send', time(), \Pop\Log\Logger::NOTICE);
+                        }
                         $this->response->send();
 
+
                         // Trigger any post-dispatch events
+                        if (null !== $this->events->get('dispatch.post')) {
+                            $this->log('[Event] Post-Dispatch', time(), \Pop\Log\Logger::NOTICE);
+                        }
                         $this->events->trigger('dispatch.post', array('project' => $this));
                     }
+                } else {
+                    $this->log("Response [" . $this->response->getCode() . "]", time());
                 }
             }
         }
+
+        $this->log('Route End', time());
     }
 
     /**
@@ -1486,6 +1594,7 @@ class Project
                 // If the object is a controller, set the project object
                 if ($obj instanceof \Pop\Mvc\Controller) {
                     $obj->setProject($this);
+                    $this->controllerClass = $class;
                 }
 
                 $callable = array($obj, $method);
@@ -1496,6 +1605,7 @@ class Project
                 // If the object is a controller, set the project object
                 if ($obj instanceof \Pop\Mvc\Controller) {
                     $obj->setProject($this);
+                    $this->controllerClass = $callable;
                 }
                 $callable = array($obj, $method);
             }
