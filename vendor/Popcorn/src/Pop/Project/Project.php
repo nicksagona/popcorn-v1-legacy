@@ -1485,26 +1485,28 @@ class Project
         $stems = explode('/', $uri);
 
         $keys = array_keys($route['params']);
-        $i = $keys[0];
+        if (isset($keys[0])) {
+            $i = $keys[0];
 
-        foreach ($params as $param) {
-            if (($param != '') && !in_array($param, $stems)) {
-                $realParams[$i] = $param;
-                $i++;
+            foreach ($params as $param) {
+                if (($param != '') && !in_array($param, $stems)) {
+                    $realParams[$i] = $param;
+                    $i++;
+                }
             }
-        }
 
-        foreach ($route['params'] as $key => $value) {
-            if (substr($value, -1) == '*') {
-                $requestParams[$value] = (count($realParams) > 0) ? $realParams : array();
-            } else {
-                $requestParams[$value] = (isset($realParams[$key])) ? $realParams[$key] : null;
+            foreach ($route['params'] as $key => $value) {
+                if (substr($value, -1) == '*') {
+                    $requestParams[$value] = (count($realParams) > 0) ? $realParams : array();
+                } else {
+                    $requestParams[$value] = (isset($realParams[$key])) ? $realParams[$key] : null;
+                }
             }
-        }
 
-        // If the returned parameter result should be an array
-        if ($asArray) {
-            $requestParams = array($requestParams);
+            // If the returned parameter result should be an array
+            if ($asArray) {
+                $requestParams = array($requestParams);
+            }
         }
 
         return $requestParams;
