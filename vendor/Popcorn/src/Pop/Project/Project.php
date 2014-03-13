@@ -1480,31 +1480,25 @@ class Project
     protected function getRequestParams($uri, $route, $asArray = false)
     {
         $requestParams = array();
+        $realParams = array();
         $params = $this->request->getPath();
         $stems = explode('/', $uri);
 
-        foreach ($stems as $stem) {
-            if (($stem != '') && (in_array($stem, $params))) {
-                unset($params[array_search($stem, $params)]);
-            }
-        }
+        $keys = array_keys($route['params']);
+        $i = $keys[0];
 
-        // Handle trailing slash (last position empty)
-        if (empty($params[count($params)])) {
-            unset($params[count($params)]);
-        }
-
-        foreach ($params as $key => $value) {
-            if ($value == '') {
-                $params[$key] = null;
+        foreach ($params as $param) {
+            if (($param != '') && !in_array($param, $stems)) {
+                $realParams[$i] = $param;
+                $i++;
             }
         }
 
         foreach ($route['params'] as $key => $value) {
             if (substr($value, -1) == '*') {
-                $requestParams[$value] = (count($params) > 0) ? $params : array();
+                $requestParams[$value] = (count($realParams) > 0) ? $realParams : array();
             } else {
-                $requestParams[$value] = (isset($params[$key])) ? $params[$key] : null;
+                $requestParams[$value] = (isset($realParams[$key])) ? $realParams[$key] : null;
             }
         }
 
