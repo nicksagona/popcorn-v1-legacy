@@ -214,6 +214,12 @@ class Project
             unset($config['register']);
         }
 
+        // Is the strict flag has been passed
+        if (isset($config['strict'])) {
+            $this->setStrict((bool)$config['strict']);
+            unset($config['strict']);
+        }
+
         // Create a DB object if passed
         if (isset($config['db']) && isset($config['db']['adapter']) &&
             isset($config['db']['database']) && class_exists('Pop\Db\Db')) {

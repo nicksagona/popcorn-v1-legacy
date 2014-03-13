@@ -49,7 +49,10 @@ class PopcornTest extends \PHPUnit_Framework_TestCase
 
     public function testStrict()
     {
-        $pop = new \Pop\Pop();
+        $pop = new \Pop\Pop(array(
+            'strict' => true
+        ));
+        $this->assertTrue($pop->isStrict());
         $pop->setStrict(false);
         $this->assertFalse($pop->isStrict());
     }
