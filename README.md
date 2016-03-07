@@ -4,7 +4,7 @@ This version is now end-of-life, and represents only legacy code for reference.
 You are strongly encouraged to upgrade to version 2 of the Popcorn PHP Microframework
 and its components. You can find them here:
 
-[Popcorn PHP Website](http://popcon.popphp.org/)  
+[Popcorn PHP Website](http://popcorn.popphp.org/)  
 [Github](https://github.com/popphp/popcorn)
 
 Popcorn Micro-Framework v1.3.0
